@@ -30,6 +30,10 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { RoleForm } from './features/security/roles/pages/role-form/role-form';
+import { UsersList } from './features/security/users/pages/users-list/users-list';
+import { UserForm } from './features/security/users/pages/user-form/user-form';
+import { RolesList } from './features/security/roles/pages/roles-list/roles-list';
 
 @NgModule({
   declarations: [
@@ -40,7 +44,11 @@ import { MatPaginatorModule } from '@angular/material/paginator';
     Dashboard,
     Cases,
     CaseCreate,
-    AppToolbar
+    AppToolbar,
+    RolesList,
+    RoleForm,
+    UsersList,
+    UserForm
   ],
   imports: [
     BrowserModule,
