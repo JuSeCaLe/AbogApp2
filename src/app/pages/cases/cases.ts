@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { CaseService } from '../../services/case.service';
+import { CaseService } from '../../core/services/case.service';
 import { Router } from '@angular/router';
-import { Case } from '../../models/case.model';
+import { Case } from '../../core/models/case.model';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 

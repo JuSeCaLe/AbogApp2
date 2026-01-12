@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { CaseService } from '../../services/case.service';
-import { Case } from '../../models/case.model';
+import { CaseService } from '../../core/services/case.service';
+import { Case } from '../../core/models/case.model';
 
 @Component({
   selector: 'app-dashboard',

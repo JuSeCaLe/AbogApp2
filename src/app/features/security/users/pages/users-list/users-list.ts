@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, combineLatest, map } from 'rxjs';
 
-import { UsersService } from '../../../../../services/users.service';
-import { RolesService } from '../../../../../services/roles.service';
-import { User } from '../../../../../models/user.model';
-import { Role } from '../../../../../models/role.model';
+import { UsersService } from '../../../../../core/services/users.service';
+import { RolesService } from '../../../../../core/services/roles.service';
+import { User } from '../../../../../core/models/user.model';
+import { Role } from '../../../../../core/models/role.model';
 
 type UserRow = User & { roleNames: string };
 

@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { CaseService } from '../../../services/case.service';
-import { CatalogService, CatalogItem } from '../../../services/catalog.service';
-import { PersonService, Person } from '../../../services/person.service';
-import { Case } from '../../../models/case.model';
+import { CaseService } from '../../../core/services/case.service';
+import { CatalogService, CatalogItem } from '../../../core/services/catalog.service';
+import { PersonService, Person } from '../../../core/services/person.service';
+import { Case } from '../../../core/models/case.model';
 import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({

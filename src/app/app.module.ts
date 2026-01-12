@@ -4,16 +4,16 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { AppRoutingModule } from './app-routing.module';
+import { CoreModule } from './core/core.module';
+import { SharedModule } from './shared/shared.module';
+import { LayoutModule } from './core/layout/layout.module';
 
 import { App } from './app';
 import { Login } from './auth/login/login';
-import { Home } from './layout/home/home';
-import { Sidebar } from './layout/sidebar/sidebar';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Cases } from './pages/cases/cases';
 import { CaseCreate } from './pages/cases/case-create/case-create';
-import { AppToolbar } from './layout/app-toolbar/app-toolbar';
-import { AppRoutingModule } from './app-routing.module';
 
 /* Angular Material */
 import { MatButtonModule } from '@angular/material/button';
@@ -39,12 +39,9 @@ import { RolesList } from './features/security/roles/pages/roles-list/roles-list
   declarations: [
     App,
     Login,
-    Home,
-    Sidebar,
     Dashboard,
     Cases,
     CaseCreate,
-    AppToolbar,
     RolesList,
     RoleForm,
     UsersList,
@@ -57,6 +54,9 @@ import { RolesList } from './features/security/roles/pages/roles-list/roles-list
     FormsModule,
     RouterModule,
     AppRoutingModule,
+    LayoutModule,
+    CoreModule,
+    SharedModule,
 
     MatButtonModule,
     MatInputModule,

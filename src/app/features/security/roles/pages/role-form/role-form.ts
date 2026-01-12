@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { RolesService } from '../../../../../services/roles.service';
-import { Role } from '../../../../../models/role.model';
+import { RolesService } from '../../../../../core/services/roles.service';
+import { Role } from '../../../../../core/models/role.model';
 
 
 @Component({
