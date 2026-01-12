@@ -11,9 +11,9 @@ import { LayoutModule } from './core/layout/layout.module';
 
 import { App } from './app';
 import { Login } from './auth/login/login';
-import { Dashboard } from './pages/dashboard/dashboard';
-import { Cases } from './pages/cases/cases';
-import { CaseCreate } from './pages/cases/case-create/case-create';
+import { Dashboard } from './features/dashboard/dashboard';
+import { Cases } from './features/cases/cases';
+import { CaseCreate } from './features/cases/case-create/case-create';
 import { RoleForm } from './features/security/roles/pages/role-form/role-form';
 import { UsersList } from './features/security/users/pages/users-list/users-list';
 import { UserForm } from './features/security/users/pages/user-form/user-form';
