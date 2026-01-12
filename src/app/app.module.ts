@@ -9,6 +9,10 @@ import { App } from './app';
 import { Login } from './auth/login/login';
 import { Home } from './layout/home/home';
 import { Sidebar } from './layout/sidebar/sidebar';
+import { Dashboard } from './pages/dashboard/dashboard';
+import { Cases } from './pages/cases/cases';
+import { CaseCreate } from './pages/cases/case-create/case-create';
+import { AppToolbar } from './layout/app-toolbar/app-toolbar';
 import { AppRoutingModule } from './app-routing.module';
 
 /* Angular Material */
@@ -24,10 +28,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatSelectModule } from '@angular/material/select';
-import { Dashboard } from './pages/dashboard/dashboard';
-import { Cases } from './pages/cases/cases';
-import { CaseCreate } from './pages/cases/case-create/case-create';
-import { AppToolbar } from './layout/app-toolbar/app-toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 @NgModule({
   declarations: [
@@ -59,7 +61,9 @@ import { AppToolbar } from './layout/app-toolbar/app-toolbar';
     MatIconModule,
     MatTableModule,
     MatTabsModule,
-    MatSelectModule
+    MatSelectModule,
+    MatTooltipModule,
+    MatPaginatorModule
   ],
   bootstrap: [App]
 })

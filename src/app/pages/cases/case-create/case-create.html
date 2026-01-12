@@ -14,14 +14,18 @@
         <mat-form-field>
           <mat-label>Tipo de proceso</mat-label>
           <mat-select formControlName="processType">
-            <mat-option *ngFor="let type of processTypes" [value]="type">{{ type }}</mat-option>
+            <mat-option *ngFor="let p of processTypes" [value]="p.name">
+              {{ p.name }}
+            </mat-option>
           </mat-select>
         </mat-form-field>
 
         <mat-form-field>
           <mat-label>Juzgado</mat-label>
           <mat-select formControlName="court">
-            <mat-option *ngFor="let c of courts" [value]="c">{{ c }}</mat-option>
+            <mat-option *ngFor="let c of courts" [value]="c.name">
+              {{ c.name }}
+            </mat-option>
           </mat-select>
         </mat-form-field>
 
@@ -39,14 +43,18 @@
             <mat-form-field>
               <mat-label>Persona</mat-label>
               <mat-select formControlName="person">
-                <mat-option *ngFor="let person of persons" [value]="person">{{person}}</mat-option>
+                <mat-option *ngFor="let p of persons" [value]="p.fullName">
+                  {{ p.fullName }} - {{ p.document }}
+                </mat-option>
               </mat-select>
             </mat-form-field>
 
             <mat-form-field>
               <mat-label>Rol</mat-label>
               <mat-select formControlName="processRole">
-                <mat-option *ngFor="let role of processRoles" [value]="role">{{role}}</mat-option>
+                <mat-option *ngFor="let r of processRoles" [value]="r.name">
+                  {{ r.name }}
+                </mat-option>
               </mat-select>
             </mat-form-field>
 

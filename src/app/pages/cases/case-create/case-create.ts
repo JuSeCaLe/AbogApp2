@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { CaseService } from '../../../services/case.service';
+import { CatalogService, CatalogItem } from '../../../services/catalog.service';
+import { PersonService, Person } from '../../../services/person.service';
 import { Case } from '../../../models/case.model';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -14,18 +16,25 @@ export class CaseCreate implements OnInit {
   caseForm!: FormGroup;
   editingId: number | null = null;
 
-  processTypes = ['Ordinario', 'Ejecutivo', 'Laboral'];
-  courts = ['Juzgado 1', 'Juzgado 2'];
-  processRoles = ['Demandante', 'Demandado', 'Avalista'];
-  persons = ['Juan', 'Ana', 'Pedro'];
+  processTypes: CatalogItem[] = [];
+  courts: CatalogItem[] = [];
+  processRoles: CatalogItem[] = [];
+  persons: Person[] = [];
 
   constructor(private fb: FormBuilder,
               private caseService: CaseService,
+              private catalogService: CatalogService,
+              private personService: PersonService,
               private router: Router,
               private route: ActivatedRoute) {}
 
   ngOnInit() {
     this.buildForm();
+
+    this.catalogService.getProcessTypes().subscribe(r => this.processTypes = r);
+    this.catalogService.getCourts().subscribe(r => this.courts = r);
+    this.catalogService.getProcessRoles().subscribe(r => this.processRoles = r);
+    this.personService.getPersons().subscribe(r => this.persons = r);
 
     const id = this.route.snapshot.params['id'];
     if (id) {
