@@ -1,0 +1,63 @@
+<h1>Crear Caso</h1>
+
+<form [formGroup]="caseForm">
+
+  <mat-tab-group #tabGroup>
+
+    <mat-tab label="Proceso">
+      <div formGroupName="process" style="padding: 16px;">
+        <mat-form-field>
+          <mat-label>Radicado</mat-label>
+          <input matInput formControlName="radicado">
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Tipo de proceso</mat-label>
+          <mat-select formControlName="processType">
+            <mat-option *ngFor="let type of processTypes" [value]="type">{{ type }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Juzgado</mat-label>
+          <mat-select formControlName="court">
+            <mat-option *ngFor="let c of courts" [value]="c">{{ c }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Ciudad</mat-label>
+          <input matInput formControlName="city">
+        </mat-form-field>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Partes">
+      <div formGroupName="partiesInfo">
+        <div formArrayName="parties" style="margin-top:16px;">
+          <div *ngFor="let p of partiesArray.controls; let i=index" [formGroupName]="i" style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+            <mat-form-field>
+              <mat-label>Persona</mat-label>
+              <mat-select formControlName="person">
+                <mat-option *ngFor="let person of persons" [value]="person">{{person}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Rol</mat-label>
+              <mat-select formControlName="processRole">
+                <mat-option *ngFor="let role of processRoles" [value]="role">{{role}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <button mat-icon-button color="warn" type="button" (click)="removeParty(i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+  <br>
+  <button mat-raised-button color="primary" type="button" (click)="save()">Guardar Caso</button>
+</form>

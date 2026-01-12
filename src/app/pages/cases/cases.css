@@ -1,0 +1,10 @@
+table {
+  width: 100%;
+}
+
+.alert-circle {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}

@@ -1,0 +1,14 @@
+.layout {
+  height: 100vh;
+}
+
+mat-sidenav-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.page-container {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+}

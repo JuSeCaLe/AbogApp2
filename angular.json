@@ -25,13 +25,9 @@
               }
             ],
             "styles": [
+              "src/material-theme.scss",
               "src/styles.css"
-            ],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
-            "ssr": {
-              "entry": "src/server.ts"
-            }
+            ]
           },
           "configurations": {
             "production": {
@@ -58,16 +54,10 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular/build:dev-server",
-          "configurations": {
-            "production": {
-              "buildTarget": "Aboga2:build:production"
-            },
-            "development": {
-              "buildTarget": "Aboga2:build:development"
-            }
-          },
-          "defaultConfiguration": "development"
+        "builder": "@angular/build:dev-server",
+        "options": {
+          "buildTarget": "Aboga2:build:development"
+          }
         },
         "test": {
           "builder": "@angular/build:unit-test"

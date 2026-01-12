@@ -1,0 +1,26 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.case-card {
+  border-left: 8px solid gray;
+}
+
+.green {
+  border-color: #4caf50;
+}
+
+.yellow {
+  border-color: #ff9800;
+}
+
+.red {
+  border-color: #f44336;
+}
+
+.info {
+  margin-top: 15px;
+  font-size: 14px;
+}

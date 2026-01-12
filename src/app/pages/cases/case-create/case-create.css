@@ -1,0 +1,26 @@
+.case-form-container {
+  width: 100%;
+  padding: 16px;
+}
+
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 16px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.party-list {
+  margin-top: 16px;
+}
+
+.party-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
