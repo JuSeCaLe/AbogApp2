@@ -11,13 +11,6 @@ import { LayoutModule } from './core/layout/layout.module';
 
 import { App } from './app';
 import { Login } from './auth/login/login';
-import { Dashboard } from './features/dashboard/dashboard';
-import { Cases } from './features/cases/cases';
-import { CaseCreate } from './features/cases/case-create/case-create';
-import { RoleForm } from './features/security/roles/pages/role-form/role-form';
-import { UsersList } from './features/security/users/pages/users-list/users-list';
-import { UserForm } from './features/security/users/pages/user-form/user-form';
-import { RolesList } from './features/security/roles/pages/roles-list/roles-list';
 
 /* Angular Material */
 import { MaterialModule } from './shared/material.module';
@@ -27,14 +20,7 @@ import { MaterialModule } from './shared/material.module';
 @NgModule({
   declarations: [
     App,
-    Login,
-    Dashboard,
-    Cases,
-    CaseCreate,
-    RolesList,
-    RoleForm,
-    UsersList,
-    UserForm
+    Login
   ],
   imports: [
     BrowserModule,

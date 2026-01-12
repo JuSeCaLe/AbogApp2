@@ -18,16 +18,21 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'cases', component: Cases },
-      { path: 'dashboard', component: Dashboard },
-      { path: 'cases/new', component: CaseCreate },
-      { path: 'cases/:id', component: CaseCreate },
-      { path: 'security/roles', component: RolesList },
-      { path: 'security/roles/new', component: RoleForm },
-      { path: 'security/roles/:id', component: RoleForm },
-      { path: 'security/users', component: UsersList },
-      { path: 'security/users/new', component: UserForm },
-      { path: 'security/users/:id', component: UserForm }
+      {
+        path: 'dashboard',
+        loadChildren: () => import('./features/dashboard/dashboard.module')
+          .then(m => m.DashboardModule)
+      },
+      {
+        path: 'cases',
+        loadChildren: () => import('./features/cases/cases.module')
+          .then(m => m.CasesModule)
+      },
+      {
+        path: 'security',
+        loadChildren: () => import('./features/security/security.module')
+          .then(m => m.SecurityModule)
+      }
     ]
   },
   { path: '**', redirectTo: '' }
