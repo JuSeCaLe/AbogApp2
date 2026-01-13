@@ -11,9 +11,15 @@
     <span>Casos</span>
   </a>
 
-  <a mat-list-item>
-    <mat-icon>settings</mat-icon>
-    Configuración
-  </a>
+  <ng-container *ngIf="auth.hasRole('r-admin')">
+    <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>Seguridad</mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <a mat-list-item routerLink="/security/roles" routerLinkActive="active">Roles</a>
+    <a mat-list-item routerLink="/security/users" routerLinkActive="active">Usuarios</a>
+  </mat-expansion-panel>
+</ng-container>
 
 </mat-nav-list>

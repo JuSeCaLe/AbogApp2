@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { Auth } from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-toolbar',
@@ -10,7 +11,10 @@ import { Auth } from '../../services/auth.service';
 export class AppToolbar {
   @Output() menu = new EventEmitter<void>();
 
-  constructor(private auth: Auth) {}
+  constructor(
+    public auth: AuthService,
+    private router: Router
+  ) {}
 
   toggleMenu() {
     this.menu.emit();
@@ -18,5 +22,6 @@ export class AppToolbar {
 
   logout() {
     this.auth.logout();
+    this.router.navigate(['/login']);
   }
 }

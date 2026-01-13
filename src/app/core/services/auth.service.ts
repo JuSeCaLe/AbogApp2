@@ -1,33 +1,45 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class Auth {
-  private isBrowser: boolean;
+export interface AuthUser {
+  id: string;
+  email: string;
+  roleIds: string[];
+  fullName?: string;
+}
 
-  constructor(@Inject(PLATFORM_ID) private platformId: object) {
-    this.isBrowser = isPlatformBrowser(this.platformId);
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private readonly _user$ = new BehaviorSubject<AuthUser | null>({
+    id: 'u-mock',
+    email: 'admin@example.com',
+    roleIds: ['r-admin'], // 👈 cambia a ['r-lawyer'] para probar no-admin
+    fullName: 'Admin Mock',
+  });
+
+  readonly user$: Observable<AuthUser | null> = this._user$.asObservable();
+  readonly isLoggedIn$ = this.user$.pipe(map(u => !!u));
+
+  get snapshot(): AuthUser | null {
+    return this._user$.value;
   }
 
-  login(username: string, password: string): boolean {
-    if (username === 'admin' && password === '1234') {
-      if (this.isBrowser) {
-        localStorage.setItem('auth', 'true');
-      }
-      return true;
-    }
-    return false;
+  loginMock(user: AuthUser) {
+    this._user$.next(user);
   }
 
   logout() {
-    if (this.isBrowser) {
-      localStorage.removeItem('auth');
-    }
+    this._user$.next(null);
   }
 
-  isAuthenticated(): boolean {
-    return !!localStorage.getItem('auth');
+  hasRole(roleId: string): boolean {
+    const u = this._user$.value;
+    return !!u && u.roleIds.includes(roleId);
+  }
+
+  hasAnyRole(roleIds: string[]): boolean {
+    const u = this._user$.value;
+    return !!u && roleIds.some(r => u.roleIds.includes(r));
   }
 }

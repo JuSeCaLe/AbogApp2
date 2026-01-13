@@ -1,11 +1,16 @@
-<mat-toolbar color="primary" class="toolbar">
-  <button mat-icon-button (click)="menu.emit()">
+<mat-toolbar color="primary" style="display:flex; justify-content:space-between;">
+  <button mat-icon-button (click)="toggleMenu()">
     <mat-icon>menu</mat-icon>
   </button>
-
-  <span class="title">Aboga2</span>
+  <span>AbogApp2</span>
 
   <span class="spacer"></span>
 
-  <button mat-button (click)="logout()">Salir</button>
+  <ng-container *ngIf="auth.snapshot as user">
+    <span style="margin-right:12px;">
+      {{ user.fullName }}
+    </span>
+
+    <button mat-button (click)="logout()">Salir</button>
+  </ng-container>
 </mat-toolbar>

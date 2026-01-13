@@ -7,12 +7,7 @@
 
   <!-- Content -->
   <mat-sidenav-content>
-    <mat-toolbar color="primary">
-      <button mat-icon-button (click)="sidenav.toggle()">
-        <mat-icon>menu</mat-icon>
-      </button>
-      <span>Abog2</span>
-    </mat-toolbar>
+    <app-toolbar (menu)="sidenav.toggle()"></app-toolbar>
 
     <div class="page-container" style="padding: 16px;">
       <router-outlet></router-outlet>

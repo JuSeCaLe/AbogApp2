@@ -1,25 +1,39 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { Auth } from '../../core/services/auth.service';
+import { AuthService, AuthUser } from './../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: false,
   templateUrl: './login.html',
-  styleUrl: './login.css',
 })
 export class Login {
-  username = '';
-  password = '';
-  error = false;
+  constructor(
+    private auth: AuthService,
+    private router: Router
+  ) {}
 
-  constructor(private auth: Auth, private router: Router) {}
+  loginAsAdmin(): void {
+    const admin: AuthUser = {
+      id: 'u-admin',
+      email: 'admin@example.com',
+      fullName: 'Administrador',
+      roleIds: ['r-admin'],
+    };
 
-  login() {
-    if (this.auth.login(this.username, this.password)) {
-      this.router.navigate(['/']);
-    } else {
-      this.error = true;
-    }
+    this.auth.loginMock(admin);
+    this.router.navigate(['/dashboard']);
+  }
+
+  loginAsLawyer(): void {
+    const lawyer: AuthUser = {
+      id: 'u-lawyer',
+      email: 'lawyer@example.com',
+      fullName: 'Abogado',
+      roleIds: ['r-lawyer'],
+    };
+
+    this.auth.loginMock(lawyer);
+    this.router.navigate(['/dashboard']);
   }
 }
