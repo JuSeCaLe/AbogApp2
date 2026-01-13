@@ -12,6 +12,6 @@ export class RoleGuard implements CanMatch {
 
     return this.auth.hasAnyRole(allowedRoles)
       ? true
-      : this.router.createUrlTree(['/dashboard']); // o ['/login'] si prefieres
+      : this.router.createUrlTree(['/forbidden']);
   }
 }

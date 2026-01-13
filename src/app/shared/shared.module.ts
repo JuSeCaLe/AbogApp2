@@ -1,14 +1,19 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MaterialModule } from './material.module';
+import { Forbidden } from './components/forbidden/forbidden';
 
 @NgModule({
   declarations: [
-    // aquí van tus componentes/pipes/directives compartidos
+    Forbidden
   ],
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    MaterialModule
+  ],
   exports: [
     CommonModule,
-    // exporta aquí lo compartido para que features lo puedan usar
+    Forbidden
   ],
 })
 export class SharedModule {}

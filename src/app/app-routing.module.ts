@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { Login } from './auth/login/login';
 import { Home } from './core/layout/home/home';
+import { Forbidden } from './shared/components/forbidden/forbidden';
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
 
@@ -31,6 +32,7 @@ const routes: Routes = [
       }
     ]
   },
+  { path: 'forbidden', component: Forbidden },
   { path: '**', redirectTo: '' }
 ];
 
