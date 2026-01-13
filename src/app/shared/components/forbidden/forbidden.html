@@ -2,6 +2,8 @@
   <mat-card-title>403 - Sin permisos</mat-card-title>
   <mat-card-content>
     <p>No tienes permisos para acceder a esta sección.</p>
-    <button mat-raised-button color="primary" routerLink="/dashboard">Volver al Dashboard</button>
+    <button mat-raised-button color="primary" (click)="goHome()">
+      Volver al Dashboard
+    </button>
   </mat-card-content>
 </mat-card>

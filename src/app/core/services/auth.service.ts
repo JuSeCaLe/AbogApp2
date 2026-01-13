@@ -9,14 +9,33 @@ export interface AuthUser {
   fullName?: string;
 }
 
+const STORAGE_KEY = 'abogapp.auth.user';
+
+function loadUser(): AuthUser | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as AuthUser;
+  } catch {
+    return null;
+  }
+}
+
+function saveUser(user: AuthUser | null): void {
+  try {
+    if (!user) {
+      localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+  } catch {
+    // ignore storage errors
+  }
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly _user$ = new BehaviorSubject<AuthUser | null>({
-    id: 'u-mock',
-    email: 'admin@example.com',
-    roleIds: ['r-admin'], // 👈 cambia a ['r-lawyer'] para probar no-admin
-    fullName: 'Admin Mock',
-  });
+  private readonly _user$ = new BehaviorSubject<AuthUser | null>(loadUser());
 
   readonly user$: Observable<AuthUser | null> = this._user$.asObservable();
   readonly isLoggedIn$ = this.user$.pipe(map(u => !!u));
@@ -27,10 +46,12 @@ export class AuthService {
 
   loginMock(user: AuthUser) {
     this._user$.next(user);
+    saveUser(user);
   }
 
   logout() {
     this._user$.next(null);
+    saveUser(null);
   }
 
   hasRole(roleId: string): boolean {

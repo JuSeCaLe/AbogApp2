@@ -6,6 +6,9 @@ export const roleGuard: CanMatchFn = (route) => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
+  const user = auth.snapshot;
+  if (!user) return router.createUrlTree(['/login']);
+
   const allowedRoles = (route.data?.['roles'] as string[] | undefined) ?? [];
   if (allowedRoles.length === 0) return true;
 

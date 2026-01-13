@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-forbidden',
@@ -7,5 +8,9 @@ import { Component } from '@angular/core';
   styleUrl: './forbidden.css',
 })
 export class Forbidden {
+  constructor(private router: Router) {}
 
+  goHome() {
+    this.router.navigate(['/dashboard']);
+  }
 }
