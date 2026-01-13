@@ -1,15 +1,9 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { Login } from './auth/login/login';
 import { Home } from './core/layout/home/home';
-import { AuthGuard } from './core/guards/auth-guard';
-import { Dashboard } from './features/dashboard/dashboard';
-import { Cases } from './features/cases/cases';
-import { CaseCreate } from './features/cases/case-create/case-create';
-import { RolesList } from './features/security/roles/pages/roles-list/roles-list';
-import { RoleForm } from './features/security/roles/pages/role-form/role-form';
-import { UsersList } from './features/security/users/pages/users-list/users-list';
-import { UserForm } from './features/security/users/pages/user-form/user-form';
+import { AuthGuard } from './core/guards/auth.guard';
+import { RoleGuard } from './core/guards/role.guard';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -30,6 +24,8 @@ const routes: Routes = [
       },
       {
         path: 'security',
+        canActivate: [RoleGuard],
+        data: { roles: ['r-admin'] },
         loadChildren: () => import('./features/security/security.module')
           .then(m => m.SecurityModule)
       }
@@ -39,7 +35,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })],
   exports: [RouterModule]
 })
 export class AppRoutingModule {}
