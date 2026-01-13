@@ -3,7 +3,7 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { Login } from './auth/login/login';
 import { Home } from './core/layout/home/home';
 import { AuthGuard } from './core/guards/auth.guard';
-import { RoleGuard } from './core/guards/role.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 const routes: Routes = [
   { path: 'login', component: Login },
@@ -24,7 +24,7 @@ const routes: Routes = [
       },
       {
         path: 'security',
-        canActivate: [RoleGuard],
+        canMatch: [roleGuard],
         data: { roles: ['r-admin'] },
         loadChildren: () => import('./features/security/security.module')
           .then(m => m.SecurityModule)
