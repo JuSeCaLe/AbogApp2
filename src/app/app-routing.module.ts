@@ -29,6 +29,13 @@ const routes: Routes = [
         data: { roles: ['r-admin'] },
         loadChildren: () => import('./features/security/security.module')
           .then(m => m.SecurityModule)
+      },
+      {
+        path: 'parametrics',
+        canMatch: [roleGuard],
+        data: { roles: ['r-admin'] },
+        loadChildren: () => import('./features/parametrics/parametrics.module')
+          .then(m => m.ParametricsModule)
       }
     ]
   },
