@@ -1,22 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ObligationTypeService } from '../../../../core/services/obligation-type.service';
+import { ProcessTypeService } from '../../../../core/services/process-type.service';
 
 @Component({
-  selector: 'app-obligation-form',
+  selector: 'app-process-type-form',
   standalone: false,
-  templateUrl: './obligation-type-form.html',
-  styleUrl: './obligation-type-form.css',
+  templateUrl: './process-types-form.html',
+  styleUrl: './process-types-form.css',
 })
-export class ObligationTypeForm implements OnInit {
+export class ProcessTypeForm implements OnInit {
   id: string | null = null;
     isEdit = false;
     form!: FormGroup;
 
     constructor(
       private fb: FormBuilder,
-      private svc: ObligationTypeService,
+      private svc: ProcessTypeService,
       private route: ActivatedRoute,
       private router: Router
     ) {}
@@ -32,7 +32,7 @@ export class ObligationTypeForm implements OnInit {
 
       if (this.isEdit && this.id) {
         const item = this.svc.getById(this.id);
-        if (!item) return void this.router.navigate(['/parametrics/obligationType']);
+        if (!item) return void this.router.navigate(['/parametrics/oprocessType']);
         this.form.patchValue({ name: item.name, active: item.active });
       }
     }
@@ -44,10 +44,10 @@ export class ObligationTypeForm implements OnInit {
       const value = this.form.getRawValue();
       if (this.isEdit && this.id) this.svc.update(this.id, value);
       else this.svc.create(value);
-      this.router.navigate(['/parametrics/obligationType']);
+      this.router.navigate(['/parametrics/processType']);
     }
 
     cancel(): void {
-      this.router.navigate(['/parametrics/obligationType']);
+      this.router.navigate(['/parametrics/processType']);
     }
 }

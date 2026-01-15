@@ -1,0 +1,38 @@
+<div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px;">
+  <h2 style="margin:0;">Tipos de Proceso</h2>
+
+  <div style="display:flex; gap:12px; align-items:center;">
+    <mat-form-field appearance="outline" style="width:280px;">
+      <mat-label>Buscar</mat-label>
+      <input matInput [(ngModel)]="filter" placeholder="Nombre o ciudad">
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" (click)="goNew()">
+      <mat-icon>add</mat-icon>
+      Nuevo
+    </button>
+  </div>
+</div>
+
+<table mat-table [dataSource]="(filtered$ | async) ?? []" class="mat-elevation-z1" style="width:100%;">
+  <ng-container matColumnDef="name">
+    <th mat-header-cell *matHeaderCellDef>Nombre</th>
+    <td mat-cell *matCellDef="let x">{{ x.name }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="active">
+    <th mat-header-cell *matHeaderCellDef>Activo</th>
+    <td mat-cell *matCellDef="let x">{{ x.active ? 'Sí' : 'No' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef style="width:200px;">Acciones</th>
+    <td mat-cell *matCellDef="let x" style="display:flex; gap:8px;">
+      <button mat-stroked-button (click)="goEdit(x.id)">Editar</button>
+      <button mat-button (click)="toggle(x.id)">{{ x.active ? 'Inactivar' : 'Activar' }}</button>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>

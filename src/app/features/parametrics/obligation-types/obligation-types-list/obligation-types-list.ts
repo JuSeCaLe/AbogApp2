@@ -7,8 +7,8 @@ import { ObligationTypeService } from '../../../../core/services/obligation-type
 @Component({
   selector: 'app-obligation-type-list',
   standalone: false,
-  templateUrl: './obligation-type-list.html',
-  styleUrl: './obligation-type-list.css',
+  templateUrl: './obligation-types-list.html',
+  styleUrl: './obligation-types-list.css',
 })
 export class ObligationTypeList implements OnInit {
   filter = '';
