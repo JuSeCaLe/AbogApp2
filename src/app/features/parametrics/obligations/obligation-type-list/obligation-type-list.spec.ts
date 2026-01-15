@@ -1,18 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ObligationForm } from './obligation-form';
+import { ObligationTypeList } from './obligation-type-list';
 
-describe('ObligationForm', () => {
-  let component: ObligationForm;
-  let fixture: ComponentFixture<ObligationForm>;
-
+describe('ObligationTypeList', () => {
+  let component: ObligationTypeList;
+  let fixture: ComponentFixture<ObligationTypeList>;
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ObligationForm]
+      imports: [ObligationTypeList]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ObligationForm);
+    fixture = TestBed.createComponent(ObligationTypeList);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

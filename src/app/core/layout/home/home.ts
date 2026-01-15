@@ -9,5 +9,5 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './home.css',
 })
 export class Home {
-  opened = false;
+  opened = true;
 }
