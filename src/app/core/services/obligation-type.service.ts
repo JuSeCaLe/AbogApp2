@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { ObligationType } from '../models/obligation-type.model';
 
 function nowIso() { return new Date().toISOString(); }
@@ -15,6 +15,10 @@ const SEED: ObligationType[] = [
 export class ObligationTypeService {
   private readonly _items$ = new BehaviorSubject<ObligationType[]>(SEED);
     readonly items$ = this._items$.asObservable();
+
+    getObligationTypes(): Observable<ObligationType[]> {
+      return of(this._items$.value);
+    }
 
     getById(id: string): ObligationType | undefined {
       return this._items$.value.find(x => x.id === id);

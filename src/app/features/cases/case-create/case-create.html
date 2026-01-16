@@ -1,71 +1,157 @@
-<h1>Crear Caso</h1>
+<h2 style="margin:0 0 12px 0;">
+  {{ editingId ? 'Editar Caso' : 'Nuevo Caso' }}
+</h2>
 
-<form [formGroup]="caseForm">
+<form [formGroup]="caseForm" style="display:grid; gap:14px; max-width:1100px;">
 
-  <mat-tab-group #tabGroup>
+  <!-- PROCESO -->
+  <mat-card formGroupName="process">
+    <mat-card-title style="padding:16px 16px 0 16px;">Información del proceso</mat-card-title>
+    <mat-card-content style="display:grid; gap:12px; padding-top:12px;">
 
-    <mat-tab label="Proceso">
-      <div formGroupName="process" style="padding: 16px;">
-        <mat-form-field>
-          <mat-label>Radicado</mat-label>
-          <input matInput formControlName="radicado">
-        </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Radicado</mat-label>
+        <input matInput formControlName="radicado">
+        <mat-error *ngIf="caseForm.get('process.radicado')?.touched && caseForm.get('process.radicado')?.invalid">
+          Radicado es requerido
+        </mat-error>
+      </mat-form-field>
 
-        <mat-form-field>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+        <mat-form-field appearance="outline">
           <mat-label>Tipo de proceso</mat-label>
           <mat-select formControlName="processType">
-            <mat-option *ngFor="let p of processTypes" [value]="p.name">
-              {{ p.name }}
-            </mat-option>
+            <mat-option *ngFor="let t of processTypes" [value]="t.name">{{ t.name }}</mat-option>
           </mat-select>
+          <mat-error *ngIf="caseForm.get('process.processType')?.touched && caseForm.get('process.processType')?.invalid">
+            Tipo de proceso es requerido
+          </mat-error>
         </mat-form-field>
 
-        <mat-form-field>
+        <mat-form-field appearance="outline">
           <mat-label>Juzgado</mat-label>
           <mat-select formControlName="court">
-            <mat-option *ngFor="let c of courts" [value]="c.name">
-              {{ c.name }}
-            </mat-option>
+            <mat-option *ngFor="let c of courts" [value]="c.name">{{ c.name }}</mat-option>
           </mat-select>
+          <mat-error *ngIf="caseForm.get('process.court')?.touched && caseForm.get('process.court')?.invalid">
+            Juzgado es requerido
+          </mat-error>
         </mat-form-field>
+      </div>
 
-        <mat-form-field>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+        <mat-form-field appearance="outline">
           <mat-label>Ciudad</mat-label>
           <input matInput formControlName="city">
+          <mat-error *ngIf="caseForm.get('process.city')?.touched && caseForm.get('process.city')?.invalid">
+            Ciudad es requerida
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha de presentación de la demanda</mat-label>
+          <input matInput type="date" formControlName="filedAt">
+          <mat-error *ngIf="caseForm.get('process.filedAt')?.touched && caseForm.get('process.filedAt')?.invalid">
+            Fecha es requerida
+          </mat-error>
         </mat-form-field>
       </div>
-    </mat-tab>
 
-    <mat-tab label="Partes">
-      <div formGroupName="partiesInfo">
-        <div formArrayName="parties" style="margin-top:16px;">
-          <div *ngFor="let p of partiesArray.controls; let i=index" [formGroupName]="i" style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
-            <mat-form-field>
-              <mat-label>Persona</mat-label>
-              <mat-select formControlName="person">
-                <mat-option *ngFor="let p of persons" [value]="p.fullName">
-                  {{ p.fullName }} - {{ p.document }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Observaciones</mat-label>
+        <textarea matInput rows="3" formControlName="observations"></textarea>
+      </mat-form-field>
 
-            <mat-form-field>
-              <mat-label>Rol</mat-label>
-              <mat-select formControlName="processRole">
-                <mat-option *ngFor="let r of processRoles" [value]="r.name">
-                  {{ r.name }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+    </mat-card-content>
+  </mat-card>
 
-            <button mat-icon-button color="warn" type="button" (click)="removeParty(i)">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
+  <!-- PARTES -->
+  <mat-card formGroupName="partiesInfo">
+    <mat-card-title style="padding:16px 16px 0 16px;">Partes</mat-card-title>
+    <mat-card-content style="display:grid; gap:12px; padding-top:12px;">
+
+      <mat-form-field appearance="outline">
+        <mat-label>Demandante (Banco)</mat-label>
+        <mat-select formControlName="plaintiffId">
+          <mat-option *ngFor="let p of plaintiffs" [value]="p.id">{{ p.name }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="caseForm.get('partiesInfo.plaintiffId')?.touched && caseForm.get('partiesInfo.plaintiffId')?.invalid">
+          Demandante es requerido
+        </mat-error>
+      </mat-form-field>
+
+      <div style="display:grid; grid-template-columns: 1fr 280px; gap:12px;">
+        <mat-form-field appearance="outline">
+          <mat-label>Demandado - Nombre completo</mat-label>
+          <input matInput formControlName="defendantName">
+          <mat-error *ngIf="caseForm.get('partiesInfo.defendantName')?.touched && caseForm.get('partiesInfo.defendantName')?.invalid">
+            Nombre requerido
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Documento</mat-label>
+          <input matInput formControlName="defendantDocument">
+          <mat-error *ngIf="caseForm.get('partiesInfo.defendantDocument')?.touched && caseForm.get('partiesInfo.defendantDocument')?.invalid">
+            Documento requerido
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+    </mat-card-content>
+  </mat-card>
+
+  <!-- FINANCIERO -->
+  <mat-card formGroupName="financialInfo">
+    <mat-card-title style="padding:16px 16px 0 16px;">Financiero</mat-card-title>
+    <mat-card-content style="display:grid; gap:12px; padding-top:12px;">
+
+      <mat-form-field appearance="outline">
+        <mat-label>Capital</mat-label>
+        <input matInput type="number" formControlName="capital">
+        <mat-error *ngIf="caseForm.get('financialInfo.capital')?.touched && caseForm.get('financialInfo.capital')?.invalid">
+          Capital inválido
+        </mat-error>
+      </mat-form-field>
+
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0;">Obligaciones</h3>
+        <button mat-stroked-button type="button" (click)="addObligationItem()">
+          <mat-icon>add</mat-icon> Agregar
+        </button>
+      </div>
+
+      <div formArrayName="obligationsItems" style="display:grid; gap:10px;">
+        <div *ngFor="let g of obligationsItemsArray.controls; let i = index"
+             [formGroupName]="i"
+             style="display:grid; grid-template-columns: 280px 1fr 120px; gap:12px; align-items:center;">
+
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo</mat-label>
+            <mat-select formControlName="obligationType">
+              <mat-option *ngFor="let t of obligationTypes" [value]="t.id">{{ t.name }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Número</mat-label>
+            <input matInput formControlName="number">
+          </mat-form-field>
+
+          <button mat-button type="button" (click)="removeObligationItem(i)">Quitar</button>
         </div>
       </div>
-    </mat-tab>
-  </mat-tab-group>
-  <br>
-  <button mat-raised-button color="primary" type="button" (click)="save()">Guardar Caso</button>
+
+      <!-- (compatibilidad) campo string, lo dejamos oculto -->
+      <input type="hidden" formControlName="obligations" />
+
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ACCIONES -->
+  <div style="display:flex; gap:10px; justify-content:flex-end;">
+    <button mat-button type="button" (click)="cancel()">Cancelar</button>
+    <button mat-raised-button color="primary" type="button" (click)="save()">Guardar</button>
+  </div>
+
 </form>

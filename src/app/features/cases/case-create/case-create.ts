@@ -1,10 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+
 import { CaseService } from '../../../core/services/case.service';
 import { CatalogService, CatalogItem } from '../../../core/services/catalog.service';
 import { PersonService, Person } from '../../../core/services/person.service';
 import { Case } from '../../../core/models/case.model';
-import { Router, ActivatedRoute } from '@angular/router';
+import { CourtsService } from '../../../core/services/court.service';
+import { ProcessTypeService } from '../../../core/services/process-type.service';
+import { Court } from '../../../core/models/court.model';
+import { ProcessType } from '../../../core/models/process-type.model';
+import { PlaintiffsService } from '../../../core/services/plaintiff.service';
+import { ObligationTypeService } from '../../../core/services/obligation-type.service';
+import { Plaintiff } from '../../../core/models/plaintiff.model';
+import { ObligationType } from '../../../core/models/obligation-type.model';
+
+type ObligationItem = { obligationType: string; number: string };
 
 @Component({
   selector: 'app-case-create',
@@ -16,25 +27,47 @@ export class CaseCreate implements OnInit {
   caseForm!: FormGroup;
   editingId: number | null = null;
 
-  processTypes: CatalogItem[] = [];
-  courts: CatalogItem[] = [];
+  processTypes: ProcessType[] = [];
+  courts: Court[] = [];
   processRoles: CatalogItem[] = [];
+
+  // ya lo tenías, lo dejo por si en otras pantallas lo usan
   persons: Person[] = [];
 
-  constructor(private fb: FormBuilder,
-              private caseService: CaseService,
-              private catalogService: CatalogService,
-              private personService: PersonService,
-              private router: Router,
-              private route: ActivatedRoute) {}
+  // NUEVO: demandantes (bancos) y tipos de obligación (parametrizados)
+  plaintiffs: Plaintiff[] = [];
+  obligationTypes: ObligationType[] = [];
+
+  constructor(
+    private fb: FormBuilder,
+    private caseService: CaseService,
+    private catalogService: CatalogService,
+    private courtService: CourtsService,
+    private processTypeService: ProcessTypeService,
+    private plaintiffTypeService: PlaintiffsService,
+    private obligationTypeService: ObligationTypeService,
+    private personService: PersonService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
     this.buildForm();
 
-    this.catalogService.getProcessTypes().subscribe(r => this.processTypes = r);
-    this.catalogService.getCourts().subscribe(r => this.courts = r);
+    // Catálogos existentes
+    this.processTypeService.getProcessTypes().subscribe(r => this.processTypes = r);
+    this.courtService.getCourts().subscribe(r => this.courts = r);
     this.catalogService.getProcessRoles().subscribe(r => this.processRoles = r);
+
+    // Personas existentes (lo dejamos, aunque el MVP no lo requiere)
     this.personService.getPersons().subscribe(r => this.persons = r);
+
+    // Catálogos nuevos (deben existir en CatalogService; si no, te digo abajo cómo agregarlos)
+    this.plaintiffTypeService.getPlaintiffs().subscribe(r => this.plaintiffs = r);
+    this.obligationTypeService.getObligationTypes().subscribe(r => this.obligationTypes = r);
+
+    // Default: al menos 1 obligación
+    if (this.obligationsItemsArray.length === 0) this.addObligationItem();
 
     const id = this.route.snapshot.params['id'];
     if (id) {
@@ -51,16 +84,36 @@ export class CaseCreate implements OnInit {
         radicado: ['', Validators.required],
         processType: [null, Validators.required],
         court: [null, Validators.required],
-        city: ['', Validators.required]
+        city: ['', Validators.required],
+
+        // NUEVO
+        filedAt: ['', Validators.required],     // fecha presentación demanda
+        observations: ['']                     // observaciones
       }),
+
+      // MVP: demandante/demandado (sin romper partiesInfo existente)
       partiesInfo: this.fb.group({
+        plaintiffId: [null, Validators.required], // demandante (banco)
+        defendantName: ['', [Validators.required, Validators.minLength(3)]],
+        defendantDocument: ['', [Validators.required, Validators.minLength(5)]],
+
+        // mantenemos tu array original por compatibilidad
         parties: this.fb.array([])
       }),
+
       financialInfo: this.fb.group({
-        capital: [0],
+        capital: [0, [Validators.required, Validators.min(0)]],
+
+        // mantenemos este string para compatibilidad
         obligations: [''],
+
+        // NUEVO: array real de obligaciones (tipo + número)
+        obligationsItems: this.fb.array([]),
+
         fngFag: [false]
       }),
+
+      // se quedan (no estorban y el servicio de alertas usa estas fechas)
       measures: this.fb.group({
         embargo: [false],
         embargoDate: [''],
@@ -69,19 +122,27 @@ export class CaseCreate implements OnInit {
       }),
       stages: this.fb.group({
         paymentOrder: [false],
-        personalNotification: [false]
+        personalNotification: [false],
+
+        // OJO: tu CaseService alertas revisa firstInstanceDate/secondInstanceDate
+        firstInstanceDate: [''],
+        secondInstanceDate: ['']
       }),
       auction: this.fb.group({
         appraisalStatus: ['N/A'],
-        auctionStatus: ['N/A']
+        auctionStatus: ['N/A'],
+        auctionDate: [''],
+        awardDate: ['']
       }),
       closure: this.fb.group({
         terminationDate: [''],
-        terminationReason: ['']
+        terminationReason: [''],
+        deliveryDate: ['']
       })
     });
   }
 
+  // ---------- Parties (compatibilidad) ----------
   get partiesArray(): FormArray {
     return this.caseForm.get('partiesInfo.parties') as FormArray;
   }
@@ -99,16 +160,65 @@ export class CaseCreate implements OnInit {
     this.partiesArray.removeAt(i);
   }
 
-  loadCase(c: Case) {
-    this.caseForm.get('process')?.patchValue(c.process);
-    if (c.partiesInfo?.length) c.partiesInfo.forEach(p => this.addParty(p));
-    this.caseForm.get('financialInfo')?.patchValue(c.financialInfo);
-    this.caseForm.get('measures')?.patchValue(c.measures);
-    this.caseForm.get('stages')?.patchValue(c.stages);
-    this.caseForm.get('auction')?.patchValue(c.auction);
-    this.caseForm.get('closure')?.patchValue(c.closure);
+  // ---------- Obligaciones MVP ----------
+  get obligationsItemsArray(): FormArray {
+    return this.caseForm.get('financialInfo.obligationsItems') as FormArray;
   }
 
+  addObligationItem(o?: Partial<ObligationItem>) {
+    this.obligationsItemsArray.push(
+      this.fb.group({
+        obligationType: [o?.obligationType ?? null, Validators.required],
+        number: [o?.number ?? '', [Validators.required, Validators.minLength(2)]]
+      })
+    );
+  }
+
+  removeObligationItem(i: number) {
+    if (this.obligationsItemsArray.length <= 1) return;
+    this.obligationsItemsArray.removeAt(i);
+  }
+
+  // ---------- Load ----------
+  loadCase(c: Case) {
+    // process (incluye filedAt/observations si existen; no rompe si no)
+    this.caseForm.get('process')?.patchValue(c.process as any);
+
+    // partiesInfo (si ya guardaste con este MVP)
+    const pi: any = c.partiesInfo as any;
+    if (pi && typeof pi === 'object' && pi.plaintiffId) {
+      this.caseForm.get('partiesInfo')?.patchValue({
+        plaintiffId: pi.plaintiffId,
+        defendantName: pi.defendantName,
+        defendantDocument: pi.defendantDocument
+      });
+    }
+
+    // si tu modelo anterior usaba partiesInfo como array, lo dejamos también
+    if (Array.isArray(c.partiesInfo) && c.partiesInfo.length) {
+      // No llenamos partiesArray automáticamente para MVP, pero si quieres, lo puedes hacer:
+      // c.partiesInfo.forEach(p => this.addParty(p));
+    }
+
+    // financial
+    this.caseForm.get('financialInfo')?.patchValue(c.financialInfo as any);
+
+    // obligaciones: si vienes de string, no podemos reconstruir items; si ya hay items, sí
+    const fin: any = c.financialInfo as any;
+    this.obligationsItemsArray.clear();
+    if (fin?.obligationsItems?.length) {
+      fin.obligationsItems.forEach((o: ObligationItem) => this.addObligationItem(o));
+    } else {
+      this.addObligationItem();
+    }
+
+    this.caseForm.get('measures')?.patchValue(c.measures as any);
+    this.caseForm.get('stages')?.patchValue(c.stages as any);
+    this.caseForm.get('auction')?.patchValue(c.auction as any);
+    this.caseForm.get('closure')?.patchValue(c.closure as any);
+  }
+
+  // ---------- Save ----------
   save() {
     if (this.caseForm.invalid) {
       this.caseForm.markAllAsTouched();
@@ -116,16 +226,56 @@ export class CaseCreate implements OnInit {
       return;
     }
 
-    const formValue = this.caseForm.value;
+    const v = this.caseForm.getRawValue();
+
+    // Construye obligations string compatible + mantiene items para editar
+    const obligationsItems: ObligationItem[] = (v.financialInfo.obligationsItems ?? []).map((x: any) => ({
+      obligationType: String(x.obligationType),
+      number: String(x.number).trim()
+    }));
+
+    const obligationsText = obligationsItems
+      .map(o => {
+        const typeName = this.obligationTypes.find(t => t.id === o.obligationType)?.name ?? o.obligationType;
+        return `${typeName}: ${o.number}`;
+      })
+      .join(' | ');
+
+    // Construye partiesInfo compatible sin cambiar tu modelo base:
+    // guardamos también una forma "objeto" para el MVP, sin romper si Case acepta any.
+    const partiesInfoMvp = {
+      plaintiffId: v.partiesInfo.plaintiffId,
+      defendantName: String(v.partiesInfo.defendantName).trim(),
+      defendantDocument: String(v.partiesInfo.defendantDocument).trim()
+    };
+
+    // además construimos array básico por si luego lo necesitas
+    const partiesInfoArray = [
+      { processRole: 'DEMANDANTE', person: String(v.partiesInfo.plaintiffId) },
+      { processRole: 'DEMANDADO', person: `${partiesInfoMvp.defendantName} | ${partiesInfoMvp.defendantDocument}` }
+    ];
+
     const caseToSave: Case = {
       id: this.editingId || 0,
-      process: formValue.process,
-      partiesInfo: formValue.partiesInfo.parties,
-      financialInfo: formValue.financialInfo,
-      measures: formValue.measures,
-      stages: formValue.stages,
-      auction: formValue.auction,
-      closure: formValue.closure
+
+      // process incluye filedAt/observations sin romper el resto
+      process: v.process as any,
+
+      // guardamos ambas formas; la que compile dependerá de tu Case model.
+      // Si tu Case model define partiesInfo como array, usa partiesInfoArray.
+      // Si lo define como any u objeto, puedes usar partiesInfoMvp.
+      partiesInfo: (partiesInfoArray as any),
+
+      financialInfo: {
+        ...v.financialInfo,
+        obligations: obligationsText,
+        obligationsItems // guardamos items para poder editar
+      } as any,
+
+      measures: v.measures as any,
+      stages: v.stages as any,
+      auction: v.auction as any,
+      closure: v.closure as any
     };
 
     const obs = this.editingId
@@ -133,8 +283,11 @@ export class CaseCreate implements OnInit {
       : this.caseService.createCase(caseToSave);
 
     obs.subscribe(() => {
-      // Redirige al listado de casos
       this.router.navigate(['/cases']);
     });
+  }
+
+  cancel() {
+    this.router.navigate(['/cases']);
   }
 }

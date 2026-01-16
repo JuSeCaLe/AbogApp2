@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { ProcessType } from '../models/process-type.model';
 
 function nowIso() { return new Date().toISOString(); }
@@ -18,6 +18,10 @@ const SEED: ProcessType[] = [
 export class ProcessTypeService {
   private readonly _items$ = new BehaviorSubject<ProcessType[]>(SEED);
     readonly items$ = this._items$.asObservable();
+
+    getProcessTypes(): Observable<ProcessType[]> {
+      return of(this._items$.value);
+    }
 
     getById(id: string): ProcessType | undefined {
       return this._items$.value.find(x => x.id === id);

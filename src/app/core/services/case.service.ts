@@ -1,4 +1,3 @@
-// src/app/services/case.service.ts
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { Case } from '../models/case.model';
@@ -8,10 +7,6 @@ import { Case } from '../models/case.model';
 })
 export class CaseService {
   private cases$ = new BehaviorSubject<Case[]>(this.generateCases());
-
-  // ===============================
-  // PUBLIC API
-  // ===============================
 
   getCases(): Observable<Case[]> {
     return of(this.enrich(this.cases$.value));
@@ -25,14 +20,19 @@ export class CaseService {
   searchByRadicado(radicado: string): Observable<Case[]> {
     const term = radicado.trim();
     const filtered = this.cases$.value.filter(c =>
-      c.process.radicado.includes(term)
+      c.process?.radicado?.includes(term)
     );
     return of(this.enrich(filtered));
   }
 
   createCase(c: Case): Observable<Case> {
     const current = this.cases$.value;
-    c.id = Math.max(...current.map(x => x.id), 0) + 1;
+
+    const nextId =
+      current.length > 0 ? Math.max(...current.map(x => x.id), 0) + 1 : 1;
+
+    c.id = nextId;
+
     this.cases$.next([...current, c]);
     return of(c);
   }
@@ -59,11 +59,11 @@ export class CaseService {
     const dates: string[] = [];
 
     if (c.measures?.embargoDate) dates.push(c.measures.embargoDate);
-    if (c.stages?.firstInstanceDate) dates.push(c.stages.firstInstanceDate);
-    if (c.stages?.secondInstanceDate) dates.push(c.stages.secondInstanceDate);
-    if (c.auction?.auctionDate) dates.push(c.auction.auctionDate);
-    if (c.auction?.awardDate) dates.push(c.auction.awardDate);
-    if (c.closure?.deliveryDate) dates.push(c.closure.deliveryDate);
+    if ((c.stages as any)?.firstInstanceDate) dates.push((c.stages as any).firstInstanceDate);
+    if ((c.stages as any)?.secondInstanceDate) dates.push((c.stages as any).secondInstanceDate);
+    if ((c.auction as any)?.auctionDate) dates.push((c.auction as any).auctionDate);
+    if ((c.auction as any)?.awardDate) dates.push((c.auction as any).awardDate);
+    if ((c.closure as any)?.deliveryDate) dates.push((c.closure as any).deliveryDate);
 
     if (!dates.length) return null;
 
@@ -105,14 +105,16 @@ export class CaseService {
           radicado: '11001234500120230001',
           processType: 'Ejecutivo',
           court: 'Juzgado 1',
-          city: 'Bogotá'
-        },
+          city: 'Bogotá',
+          filedAt: addDays(-60),
+          observations: ''
+        } as any,
         partiesInfo: [],
-        financialInfo: { capital: 15000000, obligations: 'Hipotecario', fngFag: false },
-        measures: { embargo: true, embargoDate: addDays(5) },
-        stages: { paymentOrder: true },
-        auction: {},
-        closure: {}
+        financialInfo: { capital: 15000000, obligations: 'Hipotecario', fngFag: false } as any,
+        measures: { embargo: true, embargoDate: addDays(5) } as any,
+        stages: { paymentOrder: true } as any,
+        auction: {} as any,
+        closure: {} as any
       },
       {
         id: 2,
@@ -120,14 +122,16 @@ export class CaseService {
           radicado: '76001234500220230002',
           processType: 'Ordinario',
           court: 'Juzgado 5',
-          city: 'Cali'
-        },
+          city: 'Cali',
+          filedAt: addDays(-30),
+          observations: ''
+        } as any,
         partiesInfo: [],
-        financialInfo: { capital: 5000000 },
-        measures: {},
-        stages: { firstInstanceDate: addDays(20) },
-        auction: {},
-        closure: {}
+        financialInfo: { capital: 5000000 } as any,
+        measures: {} as any,
+        stages: { firstInstanceDate: addDays(20) } as any,
+        auction: {} as any,
+        closure: {} as any
       },
       {
         id: 3,
@@ -135,14 +139,16 @@ export class CaseService {
           radicado: '05001234500320230003',
           processType: 'Ejecutivo',
           court: 'Juzgado 3',
-          city: 'Medellín'
-        },
+          city: 'Medellín',
+          filedAt: addDays(-10),
+          observations: ''
+        } as any,
         partiesInfo: [],
-        financialInfo: { capital: 9000000 },
-        measures: {},
-        stages: {},
-        auction: { auctionDate: addDays(60) },
-        closure: {}
+        financialInfo: { capital: 9000000 } as any,
+        measures: {} as any,
+        stages: {} as any,
+        auction: { auctionDate: addDays(60) } as any,
+        closure: {} as any
       },
       {
         id: 4,
@@ -150,14 +156,16 @@ export class CaseService {
           radicado: '08001234500420230004',
           processType: 'Ordinario',
           court: 'Juzgado 2',
-          city: 'Barranquilla'
-        },
+          city: 'Barranquilla',
+          filedAt: addDays(-5),
+          observations: ''
+        } as any,
         partiesInfo: [],
-        financialInfo: { capital: 3000000 },
-        measures: {},
-        stages: {},
-        auction: {},
-        closure: {}
+        financialInfo: { capital: 3000000 } as any,
+        measures: {} as any,
+        stages: {} as any,
+        auction: {} as any,
+        closure: {} as any
       },
       {
         id: 5,
@@ -165,14 +173,16 @@ export class CaseService {
           radicado: '08001234500420260004',
           processType: 'Ordinario',
           court: 'Juzgado 2',
-          city: 'Barranquilla'
-        },
+          city: 'Barranquilla',
+          filedAt: addDays(-1),
+          observations: ''
+        } as any,
         partiesInfo: [],
-        financialInfo: { capital: 3000000 },
-        measures: {},
-        stages: {},
-        auction: {},
-        closure: {}
+        financialInfo: { capital: 3000000 } as any,
+        measures: {} as any,
+        stages: {} as any,
+        auction: {} as any,
+        closure: {} as any
       },
       {
         id: 6,
@@ -180,14 +190,16 @@ export class CaseService {
           radicado: '08001234500420260014',
           processType: 'Ordinario',
           court: 'Juzgado 1',
-          city: 'Bogotá'
-        },
+          city: 'Bogotá',
+          filedAt: addDays(-2),
+          observations: ''
+        } as any,
         partiesInfo: [],
-        financialInfo: { capital: 3000000 },
-        measures: {},
-        stages: {},
-        auction: {},
-        closure: {}
+        financialInfo: { capital: 3000000 } as any,
+        measures: {} as any,
+        stages: {} as any,
+        auction: {} as any,
+        closure: {} as any
       }
     ];
   }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { Plaintiff } from '../../core/models/plaintiff.model';
 
 function nowIso() { return new Date().toISOString(); }
@@ -14,6 +14,10 @@ const SEED: Plaintiff[] = [
 export class PlaintiffsService {
   private readonly _items$ = new BehaviorSubject<Plaintiff[]>(SEED);
   readonly items$ = this._items$.asObservable();
+
+  getPlaintiffs(): Observable<Plaintiff[]> {
+    return of(this._items$.value);
+  }
 
   getById(id: string): Plaintiff | undefined {
     return this._items$.value.find(x => x.id === id);
