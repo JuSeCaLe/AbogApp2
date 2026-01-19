@@ -3,8 +3,9 @@
   justify-content:space-between;
   align-items:center;
   padding:10px 16px;
-  border-top:1px solid rgba(0,0,0,.08);
-  background:#fff;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
 }
 
 .social-link{
@@ -24,4 +25,12 @@
 .chatgpt-logo{
   width:20px;
   height:20px;
+}
+
+.app-footer a{
+  color: var(--brand-primary);
+}
+
+.app-footer a:hover{
+  color: var(--brand-primary-dark);
 }

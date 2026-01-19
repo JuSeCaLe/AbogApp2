@@ -85,54 +85,43 @@ export class CaseCreate implements OnInit {
         processType: [null, Validators.required],
         court: [null, Validators.required],
         city: ['', Validators.required],
-
-        // NUEVO
-        filedAt: ['', Validators.required],     // fecha presentación demanda
-        observations: ['']                     // observaciones
+        filedAt: [null, Validators.required],
+        observations: ['']
       }),
 
       // MVP: demandante/demandado (sin romper partiesInfo existente)
       partiesInfo: this.fb.group({
-        plaintiffId: [null, Validators.required], // demandante (banco)
+        plaintiffId: [null, Validators.required],
         defendantName: ['', [Validators.required, Validators.minLength(3)]],
         defendantDocument: ['', [Validators.required, Validators.minLength(5)]],
-
-        // mantenemos tu array original por compatibilidad
         parties: this.fb.array([])
       }),
 
       financialInfo: this.fb.group({
         capital: [0, [Validators.required, Validators.min(0)]],
-
-        // mantenemos este string para compatibilidad
         obligations: [''],
-
-        // NUEVO: array real de obligaciones (tipo + número)
         obligationsItems: this.fb.array([]),
-
         fngFag: [false]
       }),
 
       // se quedan (no estorban y el servicio de alertas usa estas fechas)
       measures: this.fb.group({
         embargo: [false],
-        embargoDate: [''],
+        embargoDate: [null],
         remanentEmbargo: [false],
         remanentEntity: ['']
       }),
       stages: this.fb.group({
         paymentOrder: [false],
         personalNotification: [false],
-
-        // OJO: tu CaseService alertas revisa firstInstanceDate/secondInstanceDate
-        firstInstanceDate: [''],
-        secondInstanceDate: ['']
+        firstInstanceDate: [null],
+        secondInstanceDate: [null]
       }),
       auction: this.fb.group({
         appraisalStatus: ['N/A'],
         auctionStatus: ['N/A'],
-        auctionDate: [''],
-        awardDate: ['']
+        auctionDate: [null],
+        awardDate: [null]
       }),
       closure: this.fb.group({
         terminationDate: [''],
@@ -183,6 +172,18 @@ export class CaseCreate implements OnInit {
   loadCase(c: Case) {
     // process (incluye filedAt/observations si existen; no rompe si no)
     this.caseForm.get('process')?.patchValue(c.process as any);
+
+    // ✅ convertir filedAt a Date para el datepicker
+    const filedAt = (c.process as any)?.filedAt;
+    this.caseForm.get('process.filedAt')?.setValue(this.toDate(filedAt));
+
+    this.caseForm.get('measures.embargoDate')?.setValue(this.toDate((c.measures as any)?.embargoDate));
+    // this.caseForm.get('stages.firstInstanceDate')?.setValue(this.toDate((c.stages as any)?.firstInstanceDate));
+    // this.caseForm.get('stages.secondInstanceDate')?.setValue(this.toDate((c.stages as any)?.secondInstanceDate));
+    // this.caseForm.get('auction.auctionDate')?.setValue(this.toDate((c.auction as any)?.auctionDate));
+    // this.caseForm.get('auction.awardDate')?.setValue(this.toDate((c.auction as any)?.awardDate));
+    // this.caseForm.get('closure.deliveryDate')?.setValue(this.toDate((c.closure as any)?.deliveryDate));
+    // this.caseForm.get('closure.terminationDate')?.setValue(this.toDate((c.closure as any)?.terminationDate));
 
     // partiesInfo (si ya guardaste con este MVP)
     const pi: any = c.partiesInfo as any;
@@ -255,11 +256,29 @@ export class CaseCreate implements OnInit {
       { processRole: 'DEMANDADO', person: `${partiesInfoMvp.defendantName} | ${partiesInfoMvp.defendantDocument}` }
     ];
 
+    const filedAtStr = this.toYmd(v.process.filedAt);
+    // // si cambiaste otras fechas:
+    // const embargoDateStr = this.toYmd(v.measures.embargoDate);
+    // const firstInstanceDateStr = this.toYmd(v.stages.firstInstanceDate);
+    // const secondInstanceDateStr = this.toYmd(v.stages.secondInstanceDate);
+    // const auctionDateStr = this.toYmd(v.auction.auctionDate);
+    // const awardDateStr = this.toYmd(v.auction.awardDate);
+    // const deliveryDateStr = this.toYmd(v.closure.deliveryDate);
+    // const terminationDateStr = this.toYmd(v.closure.terminationDate);
+
     const caseToSave: Case = {
       id: this.editingId || 0,
 
       // process incluye filedAt/observations sin romper el resto
-      process: v.process as any,
+      process: {
+        ...v.process,
+        filedAt: filedAtStr
+      } as any,
+
+      // measures: { ...v.measures, embargoDate: embargoDateStr } as any,
+      // stages: { ...v.stages, firstInstanceDate: firstInstanceDateStr, secondInstanceDate: secondInstanceDateStr } as any,
+      // auction: { ...v.auction, auctionDate: auctionDateStr, awardDate: awardDateStr } as any,
+      // closure: { ...v.closure, deliveryDate: deliveryDateStr, terminationDate: terminationDateStr } as any,
 
       // guardamos ambas formas; la que compile dependerá de tu Case model.
       // Si tu Case model define partiesInfo como array, usa partiesInfoArray.
@@ -289,5 +308,21 @@ export class CaseCreate implements OnInit {
 
   cancel() {
     this.router.navigate(['/cases']);
+  }
+
+  private toDate(value: any): Date | null {
+    if (!value) return null;
+    const d = value instanceof Date ? value : new Date(value);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  private toYmd(value: any): string {
+    const d = this.toDate(value);
+    if (!d) return '';
+    // YYYY-MM-DD
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
   }
 }

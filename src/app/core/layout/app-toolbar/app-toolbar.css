@@ -1,3 +1,9 @@
+mat-toolbar{
+  background: var(--surface);
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
 .toolbar {
   position: sticky;
   top: 0;

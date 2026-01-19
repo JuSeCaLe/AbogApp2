@@ -1,36 +1,42 @@
 <mat-nav-list>
 
-  <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
+  <a mat-list-item
+     routerLink="/dashboard"
+     routerLinkActive="nav-active"
+     [routerLinkActiveOptions]="{ exact: true }">
     <mat-icon>dashboard</mat-icon>
     <span>Dashboard</span>
   </a>
 
-  <!-- Casos -->
-  <a mat-list-item routerLink="/cases" routerLinkActive="active">
+  <a mat-list-item
+     routerLink="/cases"
+     routerLinkActive="nav-active">
     <mat-icon>folder</mat-icon>
     <span>Casos</span>
   </a>
 
   <ng-container *ngIf="auth.hasRole('r-admin')">
+
     <mat-expansion-panel>
-    <mat-expansion-panel-header>
-      <mat-panel-title>Seguridad</mat-panel-title>
-    </mat-expansion-panel-header>
+      <mat-expansion-panel-header>
+        <mat-panel-title>Seguridad</mat-panel-title>
+      </mat-expansion-panel-header>
 
-    <a mat-list-item routerLink="/security/roles" routerLinkActive="active">Roles</a>
-    <a mat-list-item routerLink="/security/users" routerLinkActive="active">Usuarios</a>
-  </mat-expansion-panel>
-  <mat-expansion-panel>
-    <mat-expansion-panel-header>
-      <mat-panel-title>Paramétricas</mat-panel-title>
-    </mat-expansion-panel-header>
+      <a mat-list-item routerLink="/security/roles" routerLinkActive="nav-active">Roles</a>
+      <a mat-list-item routerLink="/security/users" routerLinkActive="nav-active">Usuarios</a>
+    </mat-expansion-panel>
 
-    <a mat-list-item routerLink="/parametrics/courts" routerLinkActive="active">Juzgados</a>
-    <a mat-list-item routerLink="/parametrics/plaintiffs" routerLinkActive="active">Demandantes</a>
-    <a mat-list-item routerLink="/parametrics/obligationType" routerLinkActive="active">Tipo Obligación</a>
-    <a mat-list-item routerLink="/parametrics/processType" routerLinkActive="active">Tipo Proceso</a>
-  </mat-expansion-panel>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>Paramétricas</mat-panel-title>
+      </mat-expansion-panel-header>
 
-</ng-container>
+      <a mat-list-item routerLink="/parametrics/courts" routerLinkActive="nav-active">Juzgados</a>
+      <a mat-list-item routerLink="/parametrics/plaintiffs" routerLinkActive="nav-active">Demandantes</a>
+      <a mat-list-item routerLink="/parametrics/obligationType" routerLinkActive="nav-active">Tipo Obligación</a>
+      <a mat-list-item routerLink="/parametrics/processType" routerLinkActive="nav-active">Tipo Proceso</a>
+    </mat-expansion-panel>
+
+  </ng-container>
 
 </mat-nav-list>

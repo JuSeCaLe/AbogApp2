@@ -2,6 +2,34 @@
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap');
 
+/* ===============================
+   VARIABLES DE MARCA
+   =============================== */
+:root{
+  --brand-primary: #6B1F1A;
+  --brand-primary-dark: #541815;
+
+  --bg: #FFFFFF;
+  --surface: #FFFFFF;
+
+  --text: #000000;
+  --text-muted: #4B5563;
+
+  --border: #E5E7EB;
+
+  --success: #166534;
+  --warning: #92400E;
+  --danger: #991B1B;
+
+  --shadow-brand-sm: 0 1px 6px rgba(107,31,26,0.12);
+  --shadow-brand-md: 0 6px 18px rgba(107,31,26,0.16);
+}
+
+body{
+  background: var(--bg);
+  color: var(--text);
+}
+
 html, body {
   height: 100%;
   margin: 0;
@@ -10,4 +38,232 @@ html, body {
 app-root {
   display: block;
   height: 100%;
+}
+
+/* ===============================
+   BOTONES MATERIAL
+   =============================== */
+button.mat-mdc-raised-button.mat-primary{
+  background: var(--brand-primary) !important;
+  color: #fff !important;
+  border-radius: 10px;
+}
+
+button.mat-mdc-raised-button.mat-primary:hover{
+  background: var(--brand-primary-dark) !important;
+}
+
+button.mat-mdc-outlined-button{
+  border-color: var(--border) !important;
+  border-radius: 10px;
+}
+
+button.mat-mdc-button:hover{
+  background: rgba(107, 31, 26, 0.06) !important;
+}
+
+.mat-mdc-calendar-body-selected{
+  background-color: var(--brand-primary) !important;
+  color: #fff !important;
+}
+
+.mat-mdc-calendar-body-today:not(.mat-mdc-calendar-body-selected){
+  border-color: var(--brand-primary);
+}
+
+.mat-mdc-calendar-body-cell:hover
+.mat-mdc-calendar-body-cell-content{
+  background-color: rgba(107,31,26,0.08) !important;
+}
+
+.mat-mdc-calendar-header{
+  background-color: #F9FAFB;
+}
+
+.mat-mdc-calendar-header .mat-mdc-button{
+  color: var(--brand-primary) !important;
+}
+
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing{
+  border-color: var(--brand-primary) !important;
+  border-width: 2px;
+}
+
+.mat-mdc-form-field.mat-focused .mdc-floating-label{
+  color: var(--brand-primary) !important;
+}
+
+.mat-mdc-form-field.mat-focused mat-icon{
+  color: var(--brand-primary) !important;
+}
+
+.mat-mdc-form-field:hover .mdc-notched-outline__leading,
+.mat-mdc-form-field:hover .mdc-notched-outline__notch,
+.mat-mdc-form-field:hover .mdc-notched-outline__trailing{
+  border-color: rgba(107,31,26,0.6);
+}
+
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__trailing{
+  border-color: var(--danger) !important;
+}
+
+.mat-mdc-form-field.mat-form-field-invalid .mdc-floating-label{
+  color: var(--danger) !important;
+}
+
+/* ===============================
+   MAT TABLE
+   =============================== */
+table.mat-mdc-table{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.mat-mdc-header-row{
+  background: #F9FAFB;
+}
+
+.mat-mdc-header-cell{
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+}
+
+.mat-mdc-cell{
+  border-bottom: 1px solid var(--border);
+}
+
+.mat-mdc-row:hover .mat-mdc-cell{
+  background: rgba(107, 31, 26, 0.04);
+}
+
+/* ===============================
+   SLIDE TOGGLE - borgoña (para mat-slide-toggle)
+   =============================== */
+
+/* Cuando está seleccionado */
+mat-slide-toggle.mat-primary .mdc-switch.mdc-switch--selected .mdc-switch__track{
+  background-color: rgba(107,31,26,.35) !important;
+  opacity: 1 !important;
+}
+
+mat-slide-toggle.mat-primary .mdc-switch.mdc-switch--selected .mdc-switch__handle{
+  background-color: var(--brand-primary) !important;
+}
+
+mat-slide-toggle.mat-primary .mdc-switch.mdc-switch--selected .mdc-switch__shadow{
+  background-color: var(--brand-primary) !important;
+}
+
+/* Hover/Focus */
+mat-slide-toggle.mat-primary .mdc-switch.mdc-switch--selected:hover .mdc-switch__track{
+  background-color: rgba(107,31,26,.45) !important;
+}
+
+mat-slide-toggle.mat-primary .mdc-switch.mdc-switch--selected:hover .mdc-switch__handle{
+  background-color: var(--brand-primary-dark) !important;
+}
+
+mat-slide-toggle .mdc-switch{
+  transform: scale(0.95);
+  transform-origin: center;
+}
+
+.actions-col{
+  width: 160px;
+  text-align: center;
+}
+
+.actions-wrap{
+  display: inline-flex;
+  align-items: center;     /* clave */
+  justify-content: center;
+  gap: 10px;
+}
+
+/* fuerza al slide-toggle a no “caerse” */
+.actions-wrap mat-slide-toggle{
+  display: inline-flex;
+  align-items: center;
+  margin: 0;              /* quita márgenes raros */
+  padding: 0;
+  transform: translateY(-1px); /* micro-ajuste visual */
+}
+
+mat-icon{
+  color: var(--brand-primary) !important;
+}
+
+button:hover mat-icon,
+a:hover mat-icon{
+  color: var(--brand-primary-dark) !important;
+}
+
+/* ===============================
+   SIDEBAR: activo full width + hover marca
+   =============================== */
+
+/* Quita padding lateral del mat-nav-list para que el highlight llegue al borde */
+mat-nav-list.mat-nav-list{
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Asegura ancho completo del item */
+mat-nav-list a.mat-list-item,
+mat-nav-list a.mat-mdc-list-item{
+  width: 100%;
+  position: relative;
+  border-radius: 10px;
+}
+
+/* Hover */
+mat-nav-list a.mat-list-item:hover,
+mat-nav-list a.mat-mdc-list-item:hover{
+  background: rgba(107,31,26,0.06) !important;
+}
+
+/* Activo: fondo full width + barra izquierda */
+mat-nav-list a.mat-list-item.nav-active,
+mat-nav-list a.mat-mdc-list-item.nav-active{
+  background: transparent !important;
+  color: var(--brand-primary) !important;
+  font-weight: 700;
+}
+
+/* Fondo full width */
+mat-nav-list a.mat-list-item.nav-active::before,
+mat-nav-list a.mat-mdc-list-item.nav-active::before{
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 3px;
+  bottom: 3px;
+  background: rgba(107,31,26,0.12);
+  border-radius: 10px;
+  z-index: -1;
+}
+
+/* Barra marca */
+mat-nav-list a.mat-list-item.nav-active::after,
+mat-nav-list a.mat-mdc-list-item.nav-active::after{
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 4px;
+  background: var(--brand-primary);
+  border-radius: 4px;
+}
+
+/* Iconos en activo */
+mat-nav-list a.nav-active mat-icon{
+  color: var(--brand-primary) !important;
 }

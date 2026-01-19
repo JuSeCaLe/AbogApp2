@@ -16,3 +16,8 @@
   display: inline-block;
   margin-right: 6px;
 }
+
+.alert-green{ color: var(--success); }
+.alert-orange{ color: var(--warning); }
+.alert-red{ color: var(--danger); }
+

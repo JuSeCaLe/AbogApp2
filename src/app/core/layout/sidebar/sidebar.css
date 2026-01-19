@@ -1,3 +1,13 @@
+.mat-sidenav{
+  background: #F9FAFB;
+  border-right: 1px solid var(--border);
+}
+
+.mat-list-item.active,
+.mat-list-item:hover{
+  color: var(--brand-primary);
+}
+
 .icono{
   margin-right: 10px;
 }
