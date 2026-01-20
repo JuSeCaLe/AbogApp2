@@ -18,3 +18,8 @@ mat-toolbar{
 .spacer {
   flex: 1 1 auto;
 }
+
+.logo{
+  width:120px;
+  height:50px;
+}

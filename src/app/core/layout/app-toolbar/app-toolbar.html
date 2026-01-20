@@ -3,6 +3,10 @@
     <mat-icon>menu</mat-icon>
   </button>
   <span>AbogApp2</span>
+  <img
+        src="/logo.png"
+        alt="ChatGPT"
+        class="logo" />
 
   <span class="spacer"></span>
 
@@ -11,6 +15,8 @@
       {{ user.fullName }}
     </span>
 
-    <button mat-button (click)="logout()">Salir</button>
+    <button mat-raised-button color="primary" type="button" (click)="logout()">
+      <mat-icon>logout</mat-icon> Salir
+    </button>
   </ng-container>
 </mat-toolbar>

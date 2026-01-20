@@ -1,9 +1,11 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, inject } from '@angular/core';
 import { CaseService } from '../../core/services/case.service';
 import { Router } from '@angular/router';
 import { Case } from '../../core/models/case.model';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatSort, Sort } from '@angular/material/sort';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-cases',
@@ -12,6 +14,7 @@ import { MatTableDataSource } from '@angular/material/table';
   styleUrls: ['./cases.css']
 })
 export class Cases implements OnInit, AfterViewInit {
+  private _liveAnnouncer = inject(LiveAnnouncer);
   displayedColumns: string[] = ['radicado', 'processType', 'court', 'city', 'alert', 'actions'];
   dataSource = new MatTableDataSource<Case>([]);
 
@@ -21,6 +24,7 @@ export class Cases implements OnInit, AfterViewInit {
   filterCourt = '';
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
   constructor(private caseService: CaseService, private router: Router) {}
 
@@ -48,6 +52,7 @@ export class Cases implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
   }
 
   applyFilters() {
@@ -68,9 +73,9 @@ export class Cases implements OnInit, AfterViewInit {
   getAlertColor(c: Case): string {
     const capital = c.financialInfo?.capital ?? 0;
 
-    if (capital >= 10_000_000) return 'red';
-    if (capital >= 5_000_000) return 'orange';
-    return 'green';
+    if (capital >= 10_000_000) return 'var(--danger)';
+    if (capital >= 5_000_000) return 'var(--warning)';
+    return 'var(--success)';
   }
 
   getAlertLabel(c: Case): string {
@@ -87,5 +92,17 @@ export class Cases implements OnInit, AfterViewInit {
 
   newCase() {
     this.router.navigate(['/cases/new']);
+  }
+
+  announceSortChange(sortState: Sort) {
+    // This example uses English messages. If your application supports
+    // multiple language, you would internationalize these strings.
+    // Furthermore, you can customize the message to add additional
+    // details about the values being sorted.
+    if (sortState.direction) {
+      this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
+    } else {
+      this._liveAnnouncer.announce('Sorting cleared');
+    }
   }
 }

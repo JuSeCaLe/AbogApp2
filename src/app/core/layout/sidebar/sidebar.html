@@ -19,22 +19,46 @@
 
     <mat-expansion-panel>
       <mat-expansion-panel-header>
-        <mat-panel-title>Seguridad</mat-panel-title>
+        <mat-panel-title>
+          <mat-icon>settings</mat-icon>
+          Seguridad
+        </mat-panel-title>
       </mat-expansion-panel-header>
 
-      <a mat-list-item routerLink="/security/roles" routerLinkActive="nav-active">Roles</a>
-      <a mat-list-item routerLink="/security/users" routerLinkActive="nav-active">Usuarios</a>
+      <a mat-list-item routerLink="/security/roles" routerLinkActive="nav-active">
+        <mat-icon>badge</mat-icon>
+        Roles
+      </a>
+      <a mat-list-item routerLink="/security/users" routerLinkActive="nav-active">
+        <mat-icon>group</mat-icon>
+        Usuarios
+      </a>
     </mat-expansion-panel>
 
     <mat-expansion-panel>
       <mat-expansion-panel-header>
-        <mat-panel-title>Paramétricas</mat-panel-title>
+        <mat-panel-title>
+          <mat-icon>hardware</mat-icon>
+          Paramétricas
+        </mat-panel-title>
       </mat-expansion-panel-header>
 
-      <a mat-list-item routerLink="/parametrics/courts" routerLinkActive="nav-active">Juzgados</a>
-      <a mat-list-item routerLink="/parametrics/plaintiffs" routerLinkActive="nav-active">Demandantes</a>
-      <a mat-list-item routerLink="/parametrics/obligationType" routerLinkActive="nav-active">Tipo Obligación</a>
-      <a mat-list-item routerLink="/parametrics/processType" routerLinkActive="nav-active">Tipo Proceso</a>
+      <a mat-list-item routerLink="/parametrics/courts" routerLinkActive="nav-active">
+        <mat-icon>gavel</mat-icon>
+        Juzgados
+      </a>
+      <a mat-list-item routerLink="/parametrics/plaintiffs" routerLinkActive="nav-active">
+        <mat-icon>person</mat-icon>
+        Demandantes
+      </a>
+      <a mat-list-item routerLink="/parametrics/obligationType" routerLinkActive="nav-active">
+        <mat-icon>assignment</mat-icon>
+        Tipo Obligación
+      </a>
+      <a mat-list-item routerLink="/parametrics/processType" routerLinkActive="nav-active">
+        <mat-icon>description</mat-icon>
+        Tipo Proceso
+      </a>
     </mat-expansion-panel>
 
   </ng-container>
