@@ -4,7 +4,7 @@
 
     <mat-form-field appearance="outline" class="full">
       <mat-label>Usuario</mat-label>
-      <input matInput [(ngModel)]="username">
+      <input matInput [(ngModel)]="email">
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full">
@@ -12,7 +12,7 @@
       <input matInput type="password" [(ngModel)]="password">
     </mat-form-field>
 
-    <button mat-raised-button color="primary" class="full" (click)="login()">
+    <button mat-raised-button color="primary" class="full" (click)="submit()">
       Entrar
     </button>
 
@@ -21,16 +21,36 @@
     </mat-error>
   </mat-card>
 </div> -->
+
 <mat-card style="max-width:360px; margin:80px auto;">
-  <mat-card-title>Login</mat-card-title>
+  <mat-card-title>
+    <img src="/logo.png" alt="ChatGPT" class="logo_login" />
+  </mat-card-title>
 
   <mat-card-content style="display:flex; flex-direction:column; gap:12px;">
-    <button mat-raised-button color="primary" (click)="loginAsAdmin()">
+    <!-- <button mat-raised-button color="primary" (click)="loginAsAdmin()">
       Entrar como Administrador
     </button>
 
     <button mat-stroked-button (click)="loginAsLawyer()">
       Entrar como Abogado
+    </button> -->
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Usuario</mat-label>
+      <input matInput [(ngModel)]="email">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Contraseña</mat-label>
+      <input matInput type="password" [(ngModel)]="password">
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" class="full" (click)="submit()">
+      Entrar
     </button>
+
+    <mat-error *ngIf="error">
+      Usuario o contraseña incorrectos
+    </mat-error>
   </mat-card-content>
 </mat-card>

@@ -12,7 +12,7 @@
 
   <ng-container *ngIf="auth.snapshot as user">
     <span style="margin-right:12px;">
-      {{ user.fullName }}
+      {{ user.userName }}
     </span>
 
     <button mat-raised-button color="primary" type="button" (click)="logout()">

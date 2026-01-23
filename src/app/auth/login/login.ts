@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService, AuthUser } from './../../core/services/auth.service';
+import { Router, ActivatedRoute } from '@angular/router';
+import { AuthService } from './../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -8,32 +8,60 @@ import { AuthService, AuthUser } from './../../core/services/auth.service';
   templateUrl: './login.html',
 })
 export class Login {
+  email = '';
+  password = '';
+  loading = false;
+  error = '';
+
   constructor(
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
-  loginAsAdmin(): void {
-    const admin: AuthUser = {
-      id: 'u-admin',
-      email: 'admin@example.com',
-      fullName: 'Administrador',
-      roleIds: ['r-admin'],
-    };
-
-    this.auth.loginMock(admin);
-    this.router.navigate(['/dashboard']);
+  ngOnInit() {
+    if (this.auth.isAuthenticated()) {
+      this.auth.loadMe().subscribe({ error: () => this.auth.logout() });
+    }
   }
 
-  loginAsLawyer(): void {
-    const lawyer: AuthUser = {
-      id: 'u-lawyer',
-      email: 'lawyer@example.com',
-      fullName: 'Abogado',
-      roleIds: ['r-lawyer'],
-    };
+  submit() {
+    if (this.loading) return;
+    this.loading = true;
+    this.error = '';
 
-    this.auth.loginMock(lawyer);
-    this.router.navigate(['/dashboard']);
+    this.auth.login(this.email, this.password).subscribe({
+      next: () => {
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/';
+        this.router.navigateByUrl(returnUrl);
+      },
+      error: (err) => {
+        this.error = err?.error?.message || 'No fue posible iniciar sesión';
+        this.loading = false;
+      }
+    });
   }
+  // loginAsAdmin(): void {
+  //   const admin: AuthUser = {
+  //     id: 'u-admin',
+  //     email: 'admin@example.com',
+  //     fullName: 'Administrador',
+  //     roleIds: ['r-admin'],
+  //   };
+
+  //   this.auth.loginMock(admin);
+  //   this.router.navigate(['/dashboard']);
+  // }
+
+  // loginAsLawyer(): void {
+  //   const lawyer: AuthUser = {
+  //     id: 'u-lawyer',
+  //     email: 'lawyer@example.com',
+  //     fullName: 'Abogado',
+  //     roleIds: ['r-lawyer'],
+  //   };
+
+  //   this.auth.loginMock(lawyer);
+  //   this.router.navigate(['/dashboard']);
+  // }
 }

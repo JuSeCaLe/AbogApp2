@@ -1,66 +1,86 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 
-export interface AuthUser {
+export interface UserMe {
   id: string;
   email: string;
-  roleIds: string[];
-  fullName?: string;
+  userName: string;
+  roles: string[];
 }
 
-const STORAGE_KEY = 'abogapp.auth.user';
-
-function loadUser(): AuthUser | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as AuthUser;
-  } catch {
-    return null;
-  }
-}
-
-function saveUser(user: AuthUser | null): void {
-  try {
-    if (!user) {
-      localStorage.removeItem(STORAGE_KEY);
-      return;
-    }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-  } catch {
-    // ignore storage errors
-  }
-}
+type LoginResponse = {
+  accessToken: string;
+  expiresIn: number;
+  user: { id: string; email: string; userName: string };
+  roles: string[];
+};
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly _user$ = new BehaviorSubject<AuthUser | null>(loadUser());
+  private isBrowser: boolean;
+  private readonly apiBase = 'https://localhost:44341/api/Auth';
 
-  readonly user$: Observable<AuthUser | null> = this._user$.asObservable();
-  readonly isLoggedIn$ = this.user$.pipe(map(u => !!u));
+  private _user$ = new BehaviorSubject<UserMe | null>(null);
+  user$ = this._user$.asObservable();
 
-  get snapshot(): AuthUser | null {
-    return this._user$.value;
+  constructor(
+    private http: HttpClient,
+    @Inject(PLATFORM_ID) private platformId: object
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
-  loginMock(user: AuthUser) {
-    this._user$.next(user);
-    saveUser(user);
+  login(email: string, password: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiBase}/login`, { email, password }).pipe(
+      tap(res => {
+        if (this.isBrowser) localStorage.setItem('accessToken', res.accessToken);
+
+        this._user$.next({
+          id: res.user.id,
+          email: res.user.email,
+          userName: res.user.userName,
+          roles: res.roles ?? []
+        });
+      })
+    );
+  }
+
+  loadMe(): Observable<UserMe> {
+    return this.http.get<UserMe>(`${this.apiBase}/me`).pipe(
+      tap(u => this._user$.next(u))
+    );
   }
 
   logout() {
+    if (this.isBrowser) localStorage.removeItem('accessToken');
     this._user$.next(null);
-    saveUser(null);
+  }
+
+  isAuthenticated(): boolean {
+    if (!this.isBrowser) return false;
+    return !!localStorage.getItem('accessToken');
+  }
+
+  get token(): string | null {
+    if (!this.isBrowser) return null;
+    return localStorage.getItem('accessToken');
+  }
+
+  get snapshot(): UserMe | null {
+    return this._user$.value;
   }
 
   hasRole(roleId: string): boolean {
     const u = this._user$.value;
-    return !!u && u.roleIds.includes(roleId);
+    return !!u && (u.roles ?? []).includes(roleId);
   }
 
   hasAnyRole(roleIds: string[]): boolean {
     const u = this._user$.value;
-    return !!u && roleIds.some(r => u.roleIds.includes(r));
+    if (!u) return false;
+    const roles = u.roles ?? [];
+    return roleIds.some(r => roles.includes(r));
   }
 }
