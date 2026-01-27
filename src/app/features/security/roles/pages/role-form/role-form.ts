@@ -25,31 +25,37 @@ export class RoleForm implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // 1️⃣ Inicializar form AQUÍ
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       description: [''],
       active: [true],
     });
 
-    // 2️⃣ Leer params
     this.id = this.route.snapshot.paramMap.get('id');
     this.isEdit = !!this.id;
 
-    // 3️⃣ Cargar datos si es edición
     if (this.isEdit && this.id) {
-      const role: Role | undefined = this.rolesService.getById(this.id);
-      if (!role) {
-        this.router.navigate(['/security/roles']);
+      const cached = this.rolesService.getById(this.id);
+
+      if (cached) {
+        this.patch(cached);
         return;
       }
 
-      this.form.patchValue({
-        name: role.name,
-        description: role.description ?? '',
-        active: role.active,
+      // ✅ 2) si no está en cache, tráelo del API
+      this.rolesService.getByIdFromApi(this.id).subscribe({
+        next: (role) => this.patch(role),
+        error: () => this.router.navigate(['/security/roles']),
       });
     }
+  }
+
+  private patch(role: Role) {
+    this.form.patchValue({
+      name: role.name,
+      description: role.description ?? '',
+      active: role.active,
+    });
   }
 
   save(): void {
@@ -61,9 +67,15 @@ export class RoleForm implements OnInit {
     const value = this.form.getRawValue();
 
     if (this.isEdit && this.id) {
-      this.rolesService.update(this.id, value);
+      this.rolesService.update(this.id, value).subscribe({
+      next: () => this.router.navigate(['/security/roles']),
+      error: (e) => console.error('PUT error', e)
+    });
     } else {
-      this.rolesService.create(value);
+      this.rolesService.create(value).subscribe({
+      next: () => this.router.navigate(['/security/roles']),
+      error: (e) => console.error('POST error', e)
+    });
     }
 
     this.router.navigate(['/security/roles']);

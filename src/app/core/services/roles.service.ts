@@ -1,46 +1,62 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap, map } from 'rxjs';
 import { Role } from '../models/role.model';
 
-function nowIso() { return new Date().toISOString(); }
-function uid() { return crypto?.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2); }
-
-const SEED_ROLES: Role[] = [
-  { id: 'r-admin', name: 'Administrador', description: 'Acceso total', active: true, createdAt: nowIso() },
-  { id: 'r-lawyer', name: 'Abogado', description: 'Gestión de casos', active: true, createdAt: nowIso() },
-  { id: 'r-assistant', name: 'Asistente', description: 'Apoyo operativo', active: true, createdAt: nowIso() },
-];
+type ApiRole = { id: string; name: string };
 
 @Injectable({ providedIn: 'root' })
 export class RolesService {
-  private readonly _roles$ = new BehaviorSubject<Role[]>(SEED_ROLES);
+  private readonly base = 'https://localhost:44341/api/Roles';
+
+  private readonly _roles$ = new BehaviorSubject<Role[]>([]);
   readonly roles$ = this._roles$.asObservable();
 
-  getSnapshot(): Role[] {
+  constructor(private http: HttpClient) {}
+
+  get snapshot(): Role[] {
     return this._roles$.value;
+  }
+
+  refresh(): Observable<Role[]> {
+    return this.getAll().pipe(
+      tap(list => this._roles$.next(list))
+    );
+  }
+
+  getAll(): Observable<Role[]> {
+    return this.http.get<Role[]>(this.base);
   }
 
   getById(id: string): Role | undefined {
     return this._roles$.value.find(r => r.id === id);
   }
 
-  create(input: Omit<Role, 'id' | 'createdAt'>): Role {
-    const role: Role = { ...input, id: uid(), createdAt: nowIso() };
-    this._roles$.next([role, ...this._roles$.value]);
-    return role;
+  getByIdFromApi(id: string): Observable<Role> {
+    return this.http.get<Role>(`${this.base}/${id}`);
   }
 
-  update(id: string, patch: Partial<Omit<Role, 'id' | 'createdAt'>>): Role {
-    const roles = this._roles$.value.map(r => r.id === id ? { ...r, ...patch } : r);
-    const updated = roles.find(r => r.id === id);
-    if (!updated) throw new Error('Role not found');
-    this._roles$.next(roles);
-    return updated;
+  create(payload: Pick<Role, 'name' | 'description' | 'active'>): Observable<Role> {
+    return this.http.post<Role>(this.base, payload).pipe(
+      tap(created => this._roles$.next([created, ...this._roles$.value]))
+    );
   }
 
-  toggleActive(id: string): void {
-    const role = this.getById(id);
-    if (!role) return;
-    this.update(id, { active: !role.active });
+  update(id: string, role: Pick<Role, 'name' | 'description' | 'active'>): Observable<void> {
+      return this.http.put<void>(`${this.base}/${id}`, role).pipe(
+      tap(() => this.refresh().subscribe())
+    );
   }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`).pipe(
+      tap(() => this._roles$.next(this._roles$.value.filter(r => r.id !== id)))
+    );
+  }
+
+  //   toggleActive(id: string): void {
+  //   const role = this.getById(id);
+  //   if (!role) return;
+  //   this.update(id, { name: role.name, description: role.description, active: !role.active });
+  // }
 }
