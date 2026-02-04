@@ -1,37 +1,49 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, map, switchMap, tap } from 'rxjs';
 import { User } from '../models/user.model';
 
-function nowIso() { return new Date().toISOString(); }
-function uid() { return crypto?.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2); }
-
-const SEED_USERS: User[] = [
-  {
-    id: 'u-1',
-    firstName: 'Juan',
-    lastName: 'Sepúlveda',
-    email: 'juan@example.com',
-    roleIds: ['r-admin'],
-    active: true,
-    createdAt: nowIso(),
-  },
-  {
-    id: 'u-2',
-    firstName: 'María',
-    lastName: 'Gómez',
-    email: 'maria@example.com',
-    roleIds: ['r-lawyer'],
-    active: true,
-    createdAt: nowIso(),
-  }
-];
+type ApiUserDto = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  userName: string;
+  active: boolean;
+  createdAt: string;
+  roles: string[];
+};
 
 @Injectable({ providedIn: 'root' })
 export class UsersService {
-  private readonly _users$ = new BehaviorSubject<User[]>(SEED_USERS);
+  private readonly base = 'https://localhost:44341/api/Users';
+
+  private readonly _users$ = new BehaviorSubject<User[]>([]);
   readonly users$ = this._users$.asObservable();
 
-  getSnapshot(): User[] {
+  constructor(private http: HttpClient) {}
+
+  private toVm(u: ApiUserDto): User {
+    return {
+      id: u.id,
+      firstName: u.firstName ?? '',
+      lastName: u.lastName ?? '',
+      email: u.email,
+      roleIds: u.roles ?? [],  // role names
+      active: u.active,
+      createdAt: u.createdAt,
+    };
+  }
+
+  // -------- read ----------
+  refresh(): Observable<User[]> {
+    return this.http.get<ApiUserDto[]>(this.base).pipe(
+      map(list => list.map(x => this.toVm(x))),
+      tap(list => this._users$.next(list))
+    );
+  }
+
+  get snapshot(): User[] {
     return this._users$.value;
   }
 
@@ -39,23 +51,83 @@ export class UsersService {
     return this._users$.value.find(u => u.id === id);
   }
 
-  create(input: Omit<User, 'id' | 'createdAt'>): User {
-    const user: User = { ...input, id: uid(), createdAt: nowIso() };
-    this._users$.next([user, ...this._users$.value]);
-    return user;
+  getByIdFromApi(id: string): Observable<User> {
+    return this.http.get<ApiUserDto>(`${this.base}/${id}`).pipe(
+      map(x => this.toVm(x))
+    );
   }
 
-  update(id: string, patch: Partial<Omit<User, 'id' | 'createdAt'>>): User {
-    const users = this._users$.value.map(u => u.id === id ? { ...u, ...patch } : u);
-    const updated = users.find(u => u.id === id);
-    if (!updated) throw new Error('User not found');
-    this._users$.next(users);
-    return updated;
+  // -------- create ----------
+  create(input: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    roleIds: string[]; // role names
+    active: boolean;
+  }): Observable<User> {
+    return this.http.post<ApiUserDto>(this.base, {
+      email: input.email,
+      firstName: input.firstName,
+      lastName: input.lastName,
+      // userName lo puede construir el back; si es requerido por tu DTO, lo mandamos:
+      userName: input.email,
+      password: input.password,
+      active: input.active,
+      roles: input.roleIds ?? [],
+    }).pipe(
+      map(x => this.toVm(x)),
+      tap(created => this._users$.next([created, ...this._users$.value]))
+    );
   }
 
-  toggleActive(id: string): void {
-    const user = this.getById(id);
-    if (!user) return;
-    this.update(id, { active: !user.active });
+  // -------- update (user + roles) ----------
+  update(id: string, patch: Partial<User> & { roleIds?: string[] }): Observable<void> {
+    const current = this.getById(id);
+
+    const firstName = patch.firstName ?? current?.firstName ?? '';
+    const lastName = patch.lastName ?? current?.lastName ?? '';
+    const email = patch.email ?? current?.email ?? '';
+    const active = patch.active ?? current?.active ?? true;
+    const roles = patch.roleIds ?? current?.roleIds ?? [];
+
+    const updateUser$ = this.http.put<void>(`${this.base}/${id}`, {
+      email,
+      firstName,
+      lastName,
+      userName: email,
+      active,
+    });
+
+    const setRoles$ = this.http.put<void>(`${this.base}/${id}/roles`, {
+      roles,
+    });
+
+    return updateUser$.pipe(
+      switchMap(() => setRoles$),
+      tap(() => {
+        const curr = this._users$.value.slice();
+        const idx = curr.findIndex(u => u.id === id);
+        if (idx >= 0) {
+          curr[idx] = {
+            ...curr[idx],
+            ...patch,
+            firstName,
+            lastName,
+            email,
+            active,
+            roleIds: roles,
+          };
+          this._users$.next(curr);
+        }
+      })
+    );
+  }
+
+  // -------- delete (hard) ----------
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`).pipe(
+      tap(() => this._users$.next(this._users$.value.filter(u => u.id !== id)))
+    );
   }
 }

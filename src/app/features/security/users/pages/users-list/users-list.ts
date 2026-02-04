@@ -1,13 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, combineLatest, map } from 'rxjs';
-
+import { FormControl } from '@angular/forms';
+import { combineLatest, Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialog } from '../../../../../shared/components/confirm-dialog/confirm-dialog';
 import { UsersService } from '../../../../../core/services/users.service';
-import { RolesService } from '../../../../../core/services/roles.service';
 import { User } from '../../../../../core/models/user.model';
-import { Role } from '../../../../../core/models/role.model';
-
-type UserRow = User & { roleNames: string };
 
 @Component({
   selector: 'app-users-list',
@@ -16,47 +15,91 @@ type UserRow = User & { roleNames: string };
   styleUrl: './users-list.css',
 })
 export class UsersList implements OnInit {
-  filter = '';
-
   users$!: Observable<User[]>;
-  roles$!: Observable<Role[]>;
-  rows$!: Observable<UserRow[]>;
+  filtered$!: Observable<User[]>;
+  search = new FormControl<string>('', { nonNullable: true });
 
-  displayedColumns: Array<'fullName' | 'email' | 'roles' | 'active' | 'actions'> =
-    ['fullName', 'email', 'roles', 'active', 'actions'];
+  displayedColumns: string[] = ['fullName', 'email', 'roles', 'createdAt','active', 'actions'];
+
+  loading = false;
+  error = '';
 
   constructor(
     private usersService: UsersService,
-    private rolesService: RolesService,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
     this.users$ = this.usersService.users$;
-    this.roles$ = this.rolesService.roles$;
+    this.reload();
 
-    this.rows$ = combineLatest([this.users$, this.roles$]).pipe(
-      map(([users, roles]) => {
-        const roleMap = new Map(roles.map(r => [r.id, r.name]));
-        const q = this.filter.trim().toLowerCase();
+    this.filtered$ = combineLatest([
+      this.users$,
+      this.search.valueChanges.pipe(startWith(this.search.value)),
+    ]).pipe(
+      map(([users, q]) => {
+        const query = (q ?? '').trim().toLowerCase();
+        if (!query) return users;
 
-        const mapped = users.map(u => {
-          const roleNames = u.roleIds.map(id => roleMap.get(id)).filter(Boolean).join(', ');
-          return { ...u, roleNames: roleNames || '-' };
+        return users.filter(u => {
+          const fullName = `${u.firstName} ${u.lastName}`.trim().toLowerCase();
+          const email = (u.email ?? '').toLowerCase();
+          const roles = (u.roleIds ?? []).join(', ').toLowerCase();
+          return fullName.includes(query) || email.includes(query) || roles.includes(query);
         });
-
-        if (!q) return mapped;
-
-        return mapped.filter(r =>
-          `${r.firstName} ${r.lastName}`.toLowerCase().includes(q) ||
-          r.email.toLowerCase().includes(q) ||
-          r.roleNames.toLowerCase().includes(q)
-        );
       })
     );
   }
 
-  goNew() { this.router.navigate(['/security/users/new']); }
-  goEdit(id: string) { this.router.navigate(['/security/users', id]); }
-  toggle(id: string) { this.usersService.toggleActive(id); }
+  reload(): void {
+    this.loading = true;
+    this.error = '';
+    this.usersService.refresh().subscribe({
+      next: () => (this.loading = false),
+      error: (e) => {
+        this.loading = false;
+        this.error = e?.error?.message || 'No se pudieron cargar los usuarios';
+      },
+    });
+  }
+
+  goNew(): void {
+    this.router.navigate(['/security/users/new']);
+  }
+
+  goEdit(id: string): void {
+    this.router.navigate(['/security/users', id]);
+  }
+
+  toggleActive(u: User): void {
+    this.usersService.update(u.id, { active: !u.active }).subscribe({
+      error: (e) => (this.error = e?.error?.message || 'No se pudo cambiar el estado'),
+    });
+  }
+
+  remove(u: User): void {
+    const ref = this.dialog.open(ConfirmDialog, {
+      width: '420px',
+      panelClass: 'confirm-dialog-panel',
+      data: {
+        title: 'Eliminar usuario',
+        message:
+          `¿Seguro que deseas eliminar a ${u.firstName} ${u.lastName} (${u.email})?\n` +
+          `Esta acción NO se puede deshacer.`,
+      },
+    });
+
+    ref.afterClosed().subscribe((ok: boolean) => {
+      if (!ok) return;
+
+      this.usersService.delete(u.id).subscribe({
+        error: (e) => (this.error = e?.error?.message || 'No se pudo eliminar el usuario'),
+      });
+    });
+  }
+
+  trackById(_: number, u: User) {
+    return u.id;
+  }
 }

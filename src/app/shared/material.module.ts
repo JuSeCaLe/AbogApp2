@@ -19,6 +19,8 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDialogModule } from '@angular/material/dialog';
 
 const MATERIAL = [
   MatButtonModule,
@@ -39,7 +41,9 @@ const MATERIAL = [
   MatSort,
   MatSlideToggleModule,
   MatDatepickerModule,
-  MatNativeDateModule
+  MatNativeDateModule,
+  MatChipsModule,
+  MatDialogModule
 ];
 
 @NgModule({

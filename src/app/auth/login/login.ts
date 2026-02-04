@@ -6,6 +6,7 @@ import { AuthService } from './../../core/services/auth.service';
   selector: 'app-login',
   standalone: false,
   templateUrl: './login.html',
+  styleUrls: ['./login.css']
 })
 export class Login {
   email = '';

@@ -2,20 +2,28 @@
   <h2 style="margin:0;">Usuarios</h2>
 
   <div style="display:flex; gap:12px; align-items:center;">
+    <button mat-stroked-button type="button" (click)="reload()">
+      <mat-icon>refresh</mat-icon>
+      Refrescar
+    </button>
+
     <mat-form-field appearance="outline" style="width:280px;">
       <mat-label>Buscar</mat-label>
-      <input matInput [(ngModel)]="filter" placeholder="Nombre, email o rol">
+      <input matInput [formControl]="search" placeholder="Nombre, email o rol">
     </mat-form-field>
 
-    <button mat-raised-button color="primary" (click)="goNew()">
+    <button mat-raised-button color="primary" type="button" (click)="goNew()">
       <mat-icon>add</mat-icon>
       Nuevo usuario
     </button>
   </div>
 </div>
 
-<table mat-table [dataSource]="(rows$ | async) ?? []" class="mat-elevation-z1" style="width:100%;">
+<div *ngIf="error" style="color:#b00020; margin-bottom:12px;">
+  {{ error }}
+</div>
 
+<table mat-table [dataSource]="(filtered$ | async) ?? []" class="mat-elevation-z1" style="width:100%;">
   <ng-container matColumnDef="fullName">
     <th mat-header-cell *matHeaderCellDef>Nombre</th>
     <td mat-cell *matCellDef="let u">{{ u.firstName }} {{ u.lastName }}</td>
@@ -28,34 +36,36 @@
 
   <ng-container matColumnDef="roles">
     <th mat-header-cell *matHeaderCellDef>Roles</th>
-    <td mat-cell *matCellDef="let u">{{ u.roleNames }}</td>
+    <td mat-cell *matCellDef="let u">{{ (u.roleIds ?? []).join(', ') || '-' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="createdAt">
+    <th mat-header-cell *matHeaderCellDef>Creado</th>
+    <td mat-cell *matCellDef="let u">{{ u.createdAt | date:'short' }}</td>
   </ng-container>
 
   <ng-container matColumnDef="active">
     <th mat-header-cell *matHeaderCellDef>Activo</th>
-    <td mat-cell *matCellDef="let u">{{ u.active ? 'Sí' : 'No' }}</td>
+    <td mat-cell *matCellDef="let u">
+      <mat-slide-toggle
+        [checked]="u.active"
+        disabled="true"
+        color="primary"
+        aria-label="Activo">
+      </mat-slide-toggle>
+    </td>
   </ng-container>
 
   <ng-container matColumnDef="actions">
-    <th mat-header-cell *matHeaderCellDef class="actions-col">Acciones</th>
+    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+    <td mat-cell *matCellDef="let u">
+      <button mat-icon-button type="button" (click)="goEdit(u.id)" aria-label="Editar">
+        <mat-icon>edit</mat-icon>
+      </button>
 
-    <td mat-cell *matCellDef="let x" class="actions-col">
-      <div class="actions-wrap">
-        <button
-          mat-icon-button
-          type="button"
-          (click)="goEdit(x.id)"
-          aria-label="Editar">
-          <mat-icon>edit</mat-icon>
-        </button>
-
-        <mat-slide-toggle
-          [checked]="x.active"
-          (change)="toggle(x.id)"
-          color="primary"
-          aria-label="Activo">
-        </mat-slide-toggle>
-      </div>
+      <button mat-icon-button type="button" (click)="remove(u)" aria-label="Eliminar">
+        <mat-icon>delete</mat-icon>
+      </button>
     </td>
   </ng-container>
 

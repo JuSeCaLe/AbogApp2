@@ -1,22 +1,78 @@
+:host {
+  display: block;
+}
+
 .login-wrapper {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f4f6f8;
+  padding: 16px;
+  background-image:
+    linear-gradient(
+      rgba(15, 76, 92, 0.85),
+      rgba(15, 76, 92, 0.85)
+    ),
+    url('/login-background.png');
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .login-card {
-  width: 320px;
-  padding: 25px;
+  width: 100%;
+  max-width: 420px;
+  padding: 28px 24px;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.login-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.logo_login {
+  width: 140px;
+  max-width: 70%;
+  height: auto;
+  display: block;
+}
+
+.login-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #000000;
+}
+
+.login-subtitle {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  opacity: 0.9;
+  color: #000000;
+}
+
+.login-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .full {
   width: 100%;
-  margin-bottom: 15px;
 }
 
-.logo_login {
-  width:120px;
-  height:50px;
+.login-btn {
+  height: 44px;
+  font-size: 15px;
+}
+
+.login-error {
+  margin-top: 6px;
 }

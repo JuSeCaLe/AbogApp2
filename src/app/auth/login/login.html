@@ -1,56 +1,30 @@
-<!-- <div class="login-wrapper">
-  <mat-card class="login-card">
-    <mat-card-title>Iniciar sesión</mat-card-title>
+<div class="login-wrapper">
+  <mat-card class="login-card mat-elevation-z8">
 
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Usuario</mat-label>
-      <input matInput [(ngModel)]="email">
-    </mat-form-field>
+    <div class="login-header">
+      <img src="../logo.png" alt="Logo" class="logo_login" />
+      <h1 class="login-title">AbogApp</h1>
+      <p class="login-subtitle">Inicia sesión para continuar</p>
+    </div>
 
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Contraseña</mat-label>
-      <input matInput type="password" [(ngModel)]="password">
-    </mat-form-field>
+    <mat-card-content class="login-content">
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Usuario</mat-label>
+        <input matInput [(ngModel)]="email" autocomplete="username">
+      </mat-form-field>
 
-    <button mat-raised-button color="primary" class="full" (click)="submit()">
-      Entrar
-    </button>
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Contraseña</mat-label>
+        <input matInput type="password" [(ngModel)]="password" autocomplete="current-password">
+      </mat-form-field>
 
-    <mat-error *ngIf="error">
-      Usuario o contraseña incorrectos
-    </mat-error>
+      <button mat-raised-button color="primary" class="full login-btn" (click)="submit()">
+        Entrar
+      </button>
+
+      <mat-error *ngIf="error" class="login-error">
+        Usuario o contraseña incorrectos
+      </mat-error>
+    </mat-card-content>
   </mat-card>
-</div> -->
-
-<mat-card style="max-width:360px; margin:80px auto;">
-  <!-- <mat-card-title>
-    <img src="/logo.png" alt="ChatGPT" class="logo_login" />
-  </mat-card-title> -->
-
-  <mat-card-content style="display:flex; flex-direction:column; gap:12px;">
-    <!-- <button mat-raised-button color="primary" (click)="loginAsAdmin()">
-      Entrar como Administrador
-    </button>
-
-    <button mat-stroked-button (click)="loginAsLawyer()">
-      Entrar como Abogado
-    </button> -->
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Usuario</mat-label>
-      <input matInput [(ngModel)]="email">
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="full">
-      <mat-label>Contraseña</mat-label>
-      <input matInput type="password" [(ngModel)]="password">
-    </mat-form-field>
-
-    <button mat-raised-button color="primary" class="full" (click)="submit()">
-      Entrar
-    </button>
-
-    <mat-error *ngIf="error">
-      Usuario o contraseña incorrectos
-    </mat-error>
-  </mat-card-content>
-</mat-card>
+</div>

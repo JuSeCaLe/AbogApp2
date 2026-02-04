@@ -2,10 +2,12 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from './material.module';
 import { Forbidden } from './components/forbidden/forbidden';
+import { ConfirmDialog } from './components/confirm-dialog/confirm-dialog';
 
 @NgModule({
   declarations: [
-    Forbidden
+    Forbidden,
+    ConfirmDialog
   ],
   imports: [
     CommonModule,
@@ -13,7 +15,8 @@ import { Forbidden } from './components/forbidden/forbidden';
   ],
   exports: [
     CommonModule,
-    Forbidden
+    Forbidden,
+    ConfirmDialog
   ],
 })
 export class SharedModule {}
