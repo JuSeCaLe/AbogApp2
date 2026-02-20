@@ -1,8 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, map } from 'rxjs';
+import { Observable, combineLatest, map, startWith } from 'rxjs';
 import { ObligationType } from '../../../../core/models/obligation-type.model';
 import { ObligationTypeService } from '../../../../core/services/obligation-type.service';
+import { FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialog } from '../../../../shared/components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-obligation-type-list',
@@ -11,32 +14,83 @@ import { ObligationTypeService } from '../../../../core/services/obligation-type
   styleUrl: './obligation-types-list.css',
 })
 export class ObligationTypeList implements OnInit {
-  filter = '';
-    items$!: Observable<ObligationType[]>;
-    filtered$!: Observable<ObligationType[]>;
+  items$!: Observable<ObligationType[]>;
+  filtered$!: Observable<ObligationType[]>;
+  search = new FormControl<string>('', { nonNullable: true });
 
-    constructor(
-      private svc: ObligationTypeService,
-      private router: Router
-    ) {}
+  displayedColumns: string[] = ['name', 'description', 'createdAt', 'active', 'actions'];
 
-    displayedColumns: Array<'name' | 'active' | 'actions'> =
-      ['name', 'active', 'actions'];
+  loading = false;
+  error = '';
 
-    ngOnInit(): void {
-      this.items$ = this.svc.items$;
-      this.filtered$ = this.items$.pipe(
-        map(list => {
-          const q = this.filter.trim().toLowerCase();
-          if (!q) return list;
-          return list.filter(x =>
-            x.name.toLowerCase().includes(q) || x.name.toLowerCase().includes(q)
-          );
-        })
-      );
-    }
+  constructor(
+    private service: ObligationTypeService,
+    private router: Router,
+    private dialog: MatDialog
+  ) {}
 
-    goNew() { this.router.navigate(['/parametrics/obligationType/new']); }
-    goEdit(id: string) { this.router.navigate(['/parametrics/obligationType', id]); }
-    toggle(id: string) { this.svc.toggleActive(id); }
+  ngOnInit(): void {
+    this.items$ = this.service.items$;
+    this.reload();
+
+    this.filtered$ = combineLatest([
+      this.items$,
+      this.search.valueChanges.pipe(startWith(this.search.value)),
+    ]).pipe(
+      map(([items, q]) => {
+        const query = (q ?? '').trim().toLowerCase();
+        if (!query) return items;
+        return items.filter(x =>
+          (x.name ?? '').toLowerCase().includes(query) ||
+          (x.description ?? '').toLowerCase().includes(query)
+        );
+      })
+    );
+  }
+
+  reload(): void {
+    this.loading = true;
+    this.error = '';
+    this.service.refresh().subscribe({
+      next: () => (this.loading = false),
+      error: (e) => {
+        this.loading = false;
+        this.error = e?.error?.message || 'No se pudieron cargar los tipos de obligación';
+      },
+    });
+  }
+
+  goNew(): void {
+    this.router.navigate(['/parametricas/tipos-obligacion/new']);
+  }
+
+  goEdit(x: ObligationType): void {
+    this.router.navigate(['/parametricas/tipos-obligacion', x.id]);
+  }
+
+  toggle(x: ObligationType): void {
+    this.service.toggleActive(x.id).subscribe({
+      error: (e) => (this.error = e?.error?.message || 'No se pudo cambiar el estado'),
+    });
+  }
+
+  remove(x: ObligationType): void {
+    const ref = this.dialog.open(ConfirmDialog, {
+      width: '420px',
+      panelClass: 'confirm-dialog-panel',
+      data: {
+        title: 'Eliminar Tipo de Obligación',
+        message: `¿Seguro que deseas eliminar "${x.name}"?\nEsta acción NO se puede deshacer.`,
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar',
+      },
+    });
+
+    ref.afterClosed().subscribe((ok: boolean) => {
+      if (!ok) return;
+      this.service.delete(x.id).subscribe({
+        error: (e) => (this.error = e?.error?.message || 'No se pudo eliminar'),
+      });
+    });
+  }
 }

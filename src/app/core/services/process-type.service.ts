@@ -1,49 +1,58 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { ProcessType } from '../models/process-type.model';
-
-function nowIso() { return new Date().toISOString(); }
-function uid() { return crypto?.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2); }
-
-const SEED: ProcessType[] = [
-  { id: 'o-1', name: 'EJECUTIVO SINGULAR', active: true, createdAt: nowIso() },
-  { id: 'o-2', name: 'EJECUTIVO HIPOTECARIO', active: true, createdAt: nowIso() },
-  { id: 'o-3', name: 'MIXTO', active: true, createdAt: nowIso() },
-  { id: 'o-4', name: 'PRENDARIO', active: true, createdAt: nowIso() },
-  { id: 'o-5', name: 'RESTITUCIÓN', active: true, createdAt: nowIso() },
-  { id: 'o-6', name: 'LEASING', active: true, createdAt: nowIso() }
-];
 
 @Injectable({ providedIn: 'root' })
 export class ProcessTypeService {
-  private readonly _items$ = new BehaviorSubject<ProcessType[]>(SEED);
-    readonly items$ = this._items$.asObservable();
+  private readonly base = 'https://localhost:44341/api/TiposObligacion';
 
-    getProcessTypes(): Observable<ProcessType[]> {
-      return of(this._items$.value);
-    }
+  private readonly _items$ = new BehaviorSubject<ProcessType[]>([]);
+  readonly items$ = this._items$.asObservable();
 
-    getById(id: string): ProcessType | undefined {
-      return this._items$.value.find(x => x.id === id);
-    }
+  constructor(private http: HttpClient) {}
 
-    create(input: Omit<ProcessType, 'id' | 'createdAt'>): ProcessType {
-      const item: ProcessType = { ...input, id: uid(), createdAt: nowIso() };
-      this._items$.next([item, ...this._items$.value]);
-      return item;
-    }
+  refresh(): Observable<ProcessType[]> {
+    return this.http.get<ProcessType[]>(this.base).pipe(
+      tap(list => this._items$.next(list))
+    );
+  }
 
-    update(id: string, patch: Partial<Omit<ProcessType, 'id' | 'createdAt'>>): ProcessType {
-      const list = this._items$.value.map(x => x.id === id ? { ...x, ...patch } : x);
-      const updated = list.find(x => x.id === id);
-      if (!updated) throw new Error('ProcessType not found');
-      this._items$.next(list);
-      return updated;
-    }
+  getByIdFromApi(id: string) {
+    return this.http.get<ProcessType>(`${this.base}/${id}`);
+  }
 
-    toggleActive(id: string) {
-      const item = this.getById(id);
-      if (!item) return;
-      this.update(id, { active: !item.active });
-    }
+  create(payload: ProcessType) {
+    return this.http.post<ProcessType>(this.base, payload).pipe(
+      tap(created => this._items$.next([created, ...this._items$.value]))
+    );
+  }
+
+  update(id: string, payload: ProcessType) {
+    return this.http.put<void>(`${this.base}/${id}`, payload).pipe(
+      tap(() => {
+        const curr = this._items$.value.slice();
+        const idx = curr.findIndex(x => x.id === id);
+        if (idx >= 0) curr[idx] = { ...curr[idx], ...payload };
+        this._items$.next(curr);
+      })
+    );
+  }
+
+  toggleActive(id: string) {
+    return this.http.patch<void>(`${this.base}/${id}/toggle-active`, {}).pipe(
+      tap(() => {
+        const curr = this._items$.value.slice();
+        const idx = curr.findIndex(x => x.id === id);
+        if (idx >= 0) curr[idx] = { ...curr[idx], active: !curr[idx].active };
+        this._items$.next(curr);
+      })
+    );
+  }
+
+  delete(id: string) {
+    return this.http.delete<void>(`${this.base}/${id}`).pipe(
+      tap(() => this._items$.next(this._items$.value.filter(x => x.id !== id)))
+    );
+  }
 }

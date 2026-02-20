@@ -55,7 +55,7 @@ export class CaseCreate implements OnInit {
     this.buildForm();
 
     // Catálogos existentes
-    this.processTypeService.getProcessTypes().subscribe(r => this.processTypes = r);
+    this.processTypeService.refresh().subscribe(r => this.processTypes = r);
     this.courtService.getCourts().subscribe(r => this.courts = r);
     this.catalogService.getProcessRoles().subscribe(r => this.processRoles = r);
 
@@ -64,7 +64,7 @@ export class CaseCreate implements OnInit {
 
     // Catálogos nuevos (deben existir en CatalogService; si no, te digo abajo cómo agregarlos)
     this.plaintiffTypeService.getPlaintiffs().subscribe(r => this.plaintiffs = r);
-    this.obligationTypeService.getObligationTypes().subscribe(r => this.obligationTypes = r);
+    this.obligationTypeService.refresh().subscribe(r => this.obligationTypes = r);
 
     // Default: al menos 1 obligación
     if (this.obligationsItemsArray.length === 0) this.addObligationItem();

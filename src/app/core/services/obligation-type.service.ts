@@ -1,46 +1,58 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { ObligationType } from '../models/obligation-type.model';
-
-function nowIso() { return new Date().toISOString(); }
-function uid() { return crypto?.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2); }
-
-const SEED: ObligationType[] = [
-  { id: 'o-1', name: 'PAGARE', active: true, createdAt: nowIso() },
-  { id: 'o-2', name: 'CONTRATO', active: true, createdAt: nowIso() },
-  { id: 'o-3', name: 'LETRA', active: true, createdAt: nowIso() }
-];
 
 @Injectable({ providedIn: 'root' })
 export class ObligationTypeService {
-  private readonly _items$ = new BehaviorSubject<ObligationType[]>(SEED);
-    readonly items$ = this._items$.asObservable();
+  private readonly base = 'https://localhost:44341/api/TiposObligacion';
 
-    getObligationTypes(): Observable<ObligationType[]> {
-      return of(this._items$.value);
-    }
+  private readonly _items$ = new BehaviorSubject<ObligationType[]>([]);
+  readonly items$ = this._items$.asObservable();
 
-    getById(id: string): ObligationType | undefined {
-      return this._items$.value.find(x => x.id === id);
-    }
+  constructor(private http: HttpClient) {}
 
-    create(input: Omit<ObligationType, 'id' | 'createdAt'>): ObligationType {
-      const item: ObligationType = { ...input, id: uid(), createdAt: nowIso() };
-      this._items$.next([item, ...this._items$.value]);
-      return item;
-    }
+  refresh(): Observable<ObligationType[]> {
+    return this.http.get<ObligationType[]>(this.base).pipe(
+      tap(list => this._items$.next(list))
+    );
+  }
 
-    update(id: string, patch: Partial<Omit<ObligationType, 'id' | 'createdAt'>>): ObligationType {
-      const list = this._items$.value.map(x => x.id === id ? { ...x, ...patch } : x);
-      const updated = list.find(x => x.id === id);
-      if (!updated) throw new Error('ObligationType not found');
-      this._items$.next(list);
-      return updated;
-    }
+  getByIdFromApi(id: string) {
+    return this.http.get<ObligationType>(`${this.base}/${id}`);
+  }
 
-    toggleActive(id: string) {
-      const item = this.getById(id);
-      if (!item) return;
-      this.update(id, { active: !item.active });
-    }
+  create(payload: ObligationType) {
+    return this.http.post<ObligationType>(this.base, payload).pipe(
+      tap(created => this._items$.next([created, ...this._items$.value]))
+    );
+  }
+
+  update(id: string, payload: ObligationType) {
+    return this.http.put<void>(`${this.base}/${id}`, payload).pipe(
+      tap(() => {
+        const curr = this._items$.value.slice();
+        const idx = curr.findIndex(x => x.id === id);
+        if (idx >= 0) curr[idx] = { ...curr[idx], ...payload };
+        this._items$.next(curr);
+      })
+    );
+  }
+
+  toggleActive(id: string) {
+    return this.http.patch<void>(`${this.base}/${id}/toggle-active`, {}).pipe(
+      tap(() => {
+        const curr = this._items$.value.slice();
+        const idx = curr.findIndex(x => x.id === id);
+        if (idx >= 0) curr[idx] = { ...curr[idx], active: !curr[idx].active };
+        this._items$.next(curr);
+      })
+    );
+  }
+
+  delete(id: string) {
+    return this.http.delete<void>(`${this.base}/${id}`).pipe(
+      tap(() => this._items$.next(this._items$.value.filter(x => x.id !== id)))
+    );
+  }
 }
