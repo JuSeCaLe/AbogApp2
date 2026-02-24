@@ -56,14 +56,14 @@ export class CaseCreate implements OnInit {
 
     // Catálogos existentes
     this.processTypeService.refresh().subscribe(r => this.processTypes = r);
-    this.courtService.getCourts().subscribe(r => this.courts = r);
+    this.courtService.refresh().subscribe(r => this.courts = r);
     this.catalogService.getProcessRoles().subscribe(r => this.processRoles = r);
 
     // Personas existentes (lo dejamos, aunque el MVP no lo requiere)
     this.personService.getPersons().subscribe(r => this.persons = r);
 
     // Catálogos nuevos (deben existir en CatalogService; si no, te digo abajo cómo agregarlos)
-    this.plaintiffTypeService.getPlaintiffs().subscribe(r => this.plaintiffs = r);
+    this.plaintiffTypeService.refresh().subscribe(r => this.plaintiffs = r);
     this.obligationTypeService.refresh().subscribe(r => this.obligationTypes = r);
 
     // Default: al menos 1 obligación

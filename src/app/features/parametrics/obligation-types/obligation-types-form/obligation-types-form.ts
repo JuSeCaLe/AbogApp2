@@ -48,7 +48,7 @@ export class ObligationTypeForm implements OnInit {
         },
         error: () => {
           this.loading = false;
-          this.router.navigate(['/parametricas/tipos-obligacion']);
+          this.router.navigate(['/parametrics/obligationType']);
         },
       });
     }
@@ -69,7 +69,7 @@ export class ObligationTypeForm implements OnInit {
       this.service.update(this.id, payload).subscribe({
         next: () => {
           this.loading = false;
-          this.router.navigate(['/parametricas/tipos-obligacion']);
+          this.router.navigate(['/parametrics/obligationType']);
         },
         error: (e) => {
           this.loading = false;
@@ -80,7 +80,7 @@ export class ObligationTypeForm implements OnInit {
       this.service.create(payload).subscribe({
         next: () => {
           this.loading = false;
-          this.router.navigate(['/parametricas/tipos-obligacion']);
+          this.router.navigate(['/parametrics/obligationType']);
         },
         error: (e) => {
           this.loading = false;
@@ -91,7 +91,7 @@ export class ObligationTypeForm implements OnInit {
   }
 
   cancel(): void {
-    this.router.navigate(['/parametricas/tipos-obligacion']);
+    this.router.navigate(['/parametrics/obligationType']);
   }
 
   get nameCtrl() { return this.form.get('name'); }

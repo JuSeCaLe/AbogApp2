@@ -5,7 +5,7 @@ import { ProcessType } from '../models/process-type.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProcessTypeService {
-  private readonly base = 'https://localhost:44341/api/TiposObligacion';
+  private readonly base = 'https://localhost:44341/api/TiposProceso';
 
   private readonly _items$ = new BehaviorSubject<ProcessType[]>([]);
   readonly items$ = this._items$.asObservable();

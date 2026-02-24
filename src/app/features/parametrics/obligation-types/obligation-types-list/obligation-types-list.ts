@@ -61,11 +61,11 @@ export class ObligationTypeList implements OnInit {
   }
 
   goNew(): void {
-    this.router.navigate(['/parametricas/tipos-obligacion/new']);
+    this.router.navigate(['/parametrics/obligationType/new']);
   }
 
   goEdit(x: ObligationType): void {
-    this.router.navigate(['/parametricas/tipos-obligacion', x.id]);
+    this.router.navigate(['/parametrics/obligationType', x.id]);
   }
 
   toggle(x: ObligationType): void {

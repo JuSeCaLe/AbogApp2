@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ObligationTypeList } from './obligation-type-list';
+import { ObligationTypeList } from './obligation-types-list';
 
 describe('ObligationTypeList', () => {
   let component: ObligationTypeList;

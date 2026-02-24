@@ -82,15 +82,7 @@
         </mat-error>
       </mat-form-field>
 
-      <div style="display:grid; grid-template-columns: 1fr 280px; gap:12px;">
-        <mat-form-field appearance="outline">
-          <mat-label>Demandado - Nombre completo</mat-label>
-          <input matInput formControlName="defendantName">
-          <mat-error *ngIf="caseForm.get('partiesInfo.defendantName')?.touched && caseForm.get('partiesInfo.defendantName')?.invalid">
-            Nombre requerido
-          </mat-error>
-        </mat-form-field>
-
+      <div style="display:grid; grid-template-columns: 1fr 70%; gap:12px;">
         <mat-form-field appearance="outline">
           <mat-label>Documento</mat-label>
           <input matInput formControlName="defendantDocument">
@@ -98,8 +90,15 @@
             Documento requerido
           </mat-error>
         </mat-form-field>
-      </div>
 
+        <mat-form-field appearance="outline">
+          <mat-label>Demandado - Nombre completo</mat-label>
+          <input matInput formControlName="defendantName">
+          <mat-error *ngIf="caseForm.get('partiesInfo.defendantName')?.touched && caseForm.get('partiesInfo.defendantName')?.invalid">
+            Nombre requerido
+          </mat-error>
+        </mat-form-field>
+      </div>
     </mat-card-content>
   </mat-card>
 
