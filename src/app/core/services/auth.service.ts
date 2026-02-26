@@ -2,6 +2,7 @@ import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface UserMe {
   id: string;
@@ -20,7 +21,8 @@ type LoginResponse = {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private isBrowser: boolean;
-  private readonly apiBase = 'https://localhost:44341/api/Auth';
+  private apiBase = environment.apiUrl;
+  //private readonly apiBase = 'https://localhost:44341/api/Auth';
 
   private _user$ = new BehaviorSubject<UserMe | null>(null);
   user$ = this._user$.asObservable();
@@ -33,7 +35,7 @@ export class AuthService {
   }
 
   login(email: string, password: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiBase}/login`, { email, password }).pipe(
+    return this.http.post<LoginResponse>(`${this.apiBase}/Auth/login`, { email, password }).pipe(
       tap(res => {
         if (this.isBrowser) localStorage.setItem('accessToken', res.accessToken);
 
@@ -48,7 +50,7 @@ export class AuthService {
   }
 
   loadMe(): Observable<UserMe> {
-    return this.http.get<UserMe>(`${this.apiBase}/me`).pipe(
+    return this.http.get<UserMe>(`${this.apiBase}/Auth/me`).pipe(
       tap(u => this._user$.next(u))
     );
   }

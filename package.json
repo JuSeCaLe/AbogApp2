@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start": "ng serve -c development",
+    "build": "ng build -c production",
+    "buld:dev": "ng build -c development",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:Aboga2": "node dist/Aboga2/server/server.mjs"

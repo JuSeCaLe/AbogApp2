@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, map, switchMap, tap } from 'rxjs';
 import { User } from '../models/user.model';
+import { environment } from '../../../environments/environment';
 
 type ApiUserDto = {
   id: string;
@@ -16,7 +17,8 @@ type ApiUserDto = {
 
 @Injectable({ providedIn: 'root' })
 export class UsersService {
-  private readonly base = 'https://localhost:44341/api/Users';
+  private apiBase = environment.apiUrl;
+  // private readonly base = 'https://localhost:44341/api/Users';
 
   private readonly _users$ = new BehaviorSubject<User[]>([]);
   readonly users$ = this._users$.asObservable();
@@ -37,7 +39,7 @@ export class UsersService {
 
   // -------- read ----------
   refresh(): Observable<User[]> {
-    return this.http.get<ApiUserDto[]>(this.base).pipe(
+    return this.http.get<ApiUserDto[]>(`${this.apiBase}/Users`).pipe(
       map(list => list.map(x => this.toVm(x))),
       tap(list => this._users$.next(list))
     );
@@ -52,7 +54,7 @@ export class UsersService {
   }
 
   getByIdFromApi(id: string): Observable<User> {
-    return this.http.get<ApiUserDto>(`${this.base}/${id}`).pipe(
+    return this.http.get<ApiUserDto>(`${this.apiBase}/Users/${id}`).pipe(
       map(x => this.toVm(x))
     );
   }
@@ -66,7 +68,7 @@ export class UsersService {
     roleIds: string[]; // role names
     active: boolean;
   }): Observable<User> {
-    return this.http.post<ApiUserDto>(this.base, {
+    return this.http.post<ApiUserDto>(`${this.apiBase}/Users`, {
       email: input.email,
       firstName: input.firstName,
       lastName: input.lastName,
@@ -91,7 +93,7 @@ export class UsersService {
     const active = patch.active ?? current?.active ?? true;
     const roles = patch.roleIds ?? current?.roleIds ?? [];
 
-    const updateUser$ = this.http.put<void>(`${this.base}/${id}`, {
+    const updateUser$ = this.http.put<void>(`${this.apiBase}/Users/${id}`, {
       email,
       firstName,
       lastName,
@@ -99,7 +101,7 @@ export class UsersService {
       active,
     });
 
-    const setRoles$ = this.http.put<void>(`${this.base}/${id}/roles`, {
+    const setRoles$ = this.http.put<void>(`${this.apiBase}/Users/${id}/roles`, {
       roles,
     });
 
@@ -126,7 +128,7 @@ export class UsersService {
 
   // -------- delete (hard) ----------
   delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.base}/${id}`).pipe(
+    return this.http.delete<void>(`${this.apiBase}/Users/${id}`).pipe(
       tap(() => this._users$.next(this._users$.value.filter(u => u.id !== id)))
     );
   }
