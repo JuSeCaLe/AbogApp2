@@ -7,7 +7,6 @@ import { environment } from '../../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class ObligationTypeService {
   private apiBase = environment.apiUrl;
-  //private readonly base = 'https://localhost:44341/api/TiposObligacion';
 
   private readonly _items$ = new BehaviorSubject<ObligationType[]>([]);
   readonly items$ = this._items$.asObservable();
