@@ -22,7 +22,6 @@ type LoginResponse = {
 export class AuthService {
   private isBrowser: boolean;
   private apiBase = environment.apiUrl;
-  //private readonly apiBase = 'https://localhost:44341/api/Auth';
 
   private _user$ = new BehaviorSubject<UserMe | null>(null);
   user$ = this._user$.asObservable();

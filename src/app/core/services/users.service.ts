@@ -18,7 +18,6 @@ type ApiUserDto = {
 @Injectable({ providedIn: 'root' })
 export class UsersService {
   private apiBase = environment.apiUrl;
-  // private readonly base = 'https://localhost:44341/api/Users';
 
   private readonly _users$ = new BehaviorSubject<User[]>([]);
   readonly users$ = this._users$.asObservable();

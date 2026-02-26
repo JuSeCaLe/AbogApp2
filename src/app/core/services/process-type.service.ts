@@ -7,7 +7,6 @@ import { environment } from '../../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class ProcessTypeService {
   private apiBase = environment.apiUrl;
-  //private readonly base = 'https://localhost:44341/api/TiposProceso';
 
   private readonly _items$ = new BehaviorSubject<ProcessType[]>([]);
   readonly items$ = this._items$.asObservable();
