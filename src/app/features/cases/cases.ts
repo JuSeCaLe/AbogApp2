@@ -15,18 +15,15 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
 })
 export class Cases implements OnInit, AfterViewInit {
   private _liveAnnouncer = inject(LiveAnnouncer);
-  displayedColumns: string[] = ['radicado', 'processType', 'court', 'city', 'alert', 'actions'];
+  displayedColumns: string[] = ['defendantName', 'document', 'observationsCount', 'alert', 'actions'];
   dataSource = new MatTableDataSource<Case>([]);
 
   filterRadicado = '';
-  filterProcessType = '';
-  filterCity = '';
-  filterCourt = '';
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private caseService: CaseService, private router: Router) {}
+  constructor(private caseService: CaseService, private router: Router) { }
 
   ngOnInit() {
     this.caseService.getCases().subscribe(cases => {
@@ -34,19 +31,22 @@ export class Cases implements OnInit, AfterViewInit {
     });
 
     this.dataSource.filterPredicate = (c: Case, filter: string) => {
-      const f = JSON.parse(filter);
-
       const radicado = c.process.radicado?.toLowerCase() || '';
-      const processType = c.process.processType?.toLowerCase() || '';
-      const city = c.process.city?.toLowerCase() || '';
-      const court = c.process.court?.toLowerCase() || '';
 
-      return (
-        radicado.includes(f.radicado) &&
-        processType.includes(f.processType) &&
-        city.includes(f.city) &&
-        court.includes(f.court)
-      );
+      return radicado.includes(filter);
+    };
+
+    this.dataSource.sortingDataAccessor = (c: Case, column: string) => {
+      switch (column) {
+        case 'defendantName':
+          return this.getDefendantName(c).toLowerCase();
+        case 'document':
+          return this.getDocument(c).toLowerCase();
+        case 'observationsCount':
+          return this.getObservationsCount(c);
+        default:
+          return '';
+      }
     };
   }
 
@@ -56,18 +56,47 @@ export class Cases implements OnInit, AfterViewInit {
   }
 
   applyFilters() {
-    const filter = {
-      radicado: this.filterRadicado.toLowerCase(),
-      processType: this.filterProcessType.toLowerCase(),
-      city: this.filterCity.toLowerCase(),
-      court: this.filterCourt.toLowerCase()
-    };
-
-    this.dataSource.filter = JSON.stringify(filter);
+    this.dataSource.filter = this.filterRadicado.trim().toLowerCase();
 
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
+  }
+
+  clearFilters() {
+    this.filterRadicado = '';
+    this.applyFilters();
+  }
+
+  getDefendant(c: Case): any | null {
+    const parties = c.partiesInfo as any[];
+
+    if (!Array.isArray(parties)) return null;
+
+    return parties.find(p => p.processRole === 'DEMANDADO') ?? null;
+  }
+
+  getDefendantName(c: Case): string {
+    const defendant = this.getDefendant(c);
+    if (!defendant?.person) return '-';
+
+    const [name] = String(defendant.person).split('|');
+    return name?.trim() || '-';
+  }
+
+  getDocument(c: Case): string {
+    const defendant = this.getDefendant(c);
+    if (!defendant?.person) return '-';
+
+    const parts = String(defendant.person).split('|').map(x => x.trim());
+    const type = parts[1] || 'CC';
+    const number = parts[2] || '';
+
+    return `${type} ${number}`.trim();
+  }
+
+  getObservationsCount(c: Case): number {
+    return c.processStages?.length ?? 0;
   }
 
   getAlertColor(c: Case): string {
@@ -87,7 +116,7 @@ export class Cases implements OnInit, AfterViewInit {
   }
 
   editCase(c: Case) {
-    this.router.navigate(['/cases', c.id]);
+    this.router.navigate(['/cases', c.id, 'edit']);
   }
 
   newCase() {
@@ -95,10 +124,6 @@ export class Cases implements OnInit, AfterViewInit {
   }
 
   announceSortChange(sortState: Sort) {
-    // This example uses English messages. If your application supports
-    // multiple language, you would internationalize these strings.
-    // Furthermore, you can customize the message to add additional
-    // details about the values being sorted.
     if (sortState.direction) {
       this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
     } else {

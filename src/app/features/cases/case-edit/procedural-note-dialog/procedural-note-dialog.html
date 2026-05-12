@@ -1,0 +1,13 @@
+<h2 mat-dialog-title>Nueva nota</h2>
+
+<mat-dialog-content [formGroup]="form" style="display:grid; gap:12px; min-width:420px;">
+  <mat-form-field appearance="outline">
+    <mat-label>Nota</mat-label>
+    <textarea matInput rows="4" formControlName="text"></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="save()">Guardar</button>
+</mat-dialog-actions>

@@ -1,0 +1,83 @@
+<ng-container *ngIf="caseData as c">
+
+  <mat-card>
+    <mat-card-content>
+      <h2 style="margin:0;">
+        {{ defendantText }}
+      </h2>
+
+      <p style="margin:6px 0 0 0;">
+        <strong>{{ c.process.processType }}</strong> · Radicado {{ c.process.radicado }}
+      </p>
+
+      <p style="margin:8px 0 0 0;">
+        Juzgado asignado: <strong>{{ c.process.court }}</strong>
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-tab-group style="margin-top:16px;">
+
+    <mat-tab label="Etapas del proceso">
+      <div style="display:flex; justify-content:flex-end; margin:16px 0;">
+        <button mat-raised-button color="primary" (click)="addStage()">
+          <mat-icon>add</mat-icon>
+          Nueva etapa
+        </button>
+      </div>
+
+      <table mat-table [dataSource]="c.processStages ?? []" class="mat-elevation-z1" style="width:100%;">
+
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Fecha creación</th>
+          <td mat-cell *matCellDef="let row">{{ row.createdAt }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="stageName">
+          <th mat-header-cell *matHeaderCellDef>Etapa</th>
+          <td mat-cell *matCellDef="let row">{{ row.stageName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="subStageName">
+          <th mat-header-cell *matHeaderCellDef>Subetapa</th>
+          <td mat-cell *matCellDef="let row">{{ row.subStageName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="observation">
+          <th mat-header-cell *matHeaderCellDef>Observación</th>
+          <td mat-cell *matCellDef="let row">{{ row.observation || '-' }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedStageColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedStageColumns;"></tr>
+      </table>
+    </mat-tab>
+
+    <mat-tab label="Impulso procesal">
+      <div style="display:flex; justify-content:flex-end; margin:16px 0;">
+        <button mat-raised-button color="primary" (click)="addNote()">
+          <mat-icon>add</mat-icon>
+          Nueva nota
+        </button>
+      </div>
+
+      <table mat-table [dataSource]="c.proceduralNotes ?? []" class="mat-elevation-z1" style="width:100%;">
+
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Fecha creación</th>
+          <td mat-cell *matCellDef="let row">{{ row.createdAt }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="text">
+          <th mat-header-cell *matHeaderCellDef>Nota</th>
+          <td mat-cell *matCellDef="let row">{{ row.text }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedNoteColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedNoteColumns;"></tr>
+      </table>
+    </mat-tab>
+
+  </mat-tab-group>
+
+</ng-container>

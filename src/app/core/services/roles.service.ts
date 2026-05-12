@@ -9,7 +9,6 @@ type ApiRole = { id: string; name: string };
 @Injectable({ providedIn: 'root' })
 export class RolesService {
   private apiBase = environment.apiUrl;
-  //private readonly base = 'https://localhost:44341/api/Roles';
 
   private readonly _roles$ = new BehaviorSubject<Role[]>([]);
   readonly roles$ = this._roles$.asObservable();

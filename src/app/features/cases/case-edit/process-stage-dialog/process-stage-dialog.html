@@ -1,0 +1,23 @@
+<h2 mat-dialog-title>Nueva etapa del proceso</h2>
+
+<mat-dialog-content [formGroup]="form" style="display:grid; gap:12px; min-width:420px;">
+  <mat-form-field appearance="outline">
+    <mat-label>Etapa</mat-label>
+    <input matInput formControlName="stageName">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Subetapa</mat-label>
+    <input matInput formControlName="subStageName">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Observación</mat-label>
+    <textarea matInput rows="3" formControlName="observation"></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="save()">Guardar</button>
+</mat-dialog-actions>
