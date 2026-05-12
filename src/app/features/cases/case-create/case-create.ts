@@ -85,8 +85,7 @@ export class CaseCreate implements OnInit {
         processType: [null, Validators.required],
         court: [null, Validators.required],
         city: ['', Validators.required],
-        filedAt: [null, Validators.required],
-        observations: ['']
+        filedAt: [null, Validators.required]
       }),
 
       // MVP: demandante/demandado (sin romper partiesInfo existente)

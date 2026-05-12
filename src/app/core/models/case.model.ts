@@ -1,10 +1,3 @@
-export interface LegalCase {
-  id: number;
-  title: string;
-  client: string;
-  dueDate: Date;
-}
-
 export interface ProcessInfo {
   radicado: string;
   processType: string;
@@ -70,4 +63,20 @@ export interface Case {
   stages?: StagesInfo;
   auction?: AuctionInfo;
   closure?: ClosureInfo;
+  processStages?: CaseProcessStage[];
+  proceduralNotes?: CaseProceduralNote[];
+}
+
+export interface CaseProcessStage {
+  id: number;
+  createdAt: string;
+  stageName: string;
+  subStageName: string;
+  observation?: string;
+}
+
+export interface CaseProceduralNote {
+  id: number;
+  createdAt: string;
+  text: string;
 }

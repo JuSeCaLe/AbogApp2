@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { Case } from '../models/case.model';
+import { CaseProcessStage, CaseProceduralNote } from '../models/case.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -86,6 +87,38 @@ export class CaseService {
     return 'green';
   }
 
+  addProcessStage(caseId: number, stage: CaseProcessStage): Observable<Case | undefined> {
+    const current = this.cases$.value;
+
+    const updated = current.map(c => {
+      if (c.id !== caseId) return c;
+
+      return {
+        ...c,
+        processStages: [...(c.processStages ?? []), stage]
+      };
+    });
+
+    this.cases$.next(updated);
+    return this.getCaseById(caseId);
+  }
+
+  addProceduralNote(caseId: number, note: CaseProceduralNote): Observable<Case | undefined> {
+    const current = this.cases$.value;
+
+    const updated = current.map(c => {
+      if (c.id !== caseId) return c;
+
+      return {
+        ...c,
+        proceduralNotes: [...(c.proceduralNotes ?? []), note]
+      };
+    });
+
+    this.cases$.next(updated);
+    return this.getCaseById(caseId);
+  }
+
   // ===============================
   // DATA GENERATOR
   // ===============================
@@ -106,16 +139,52 @@ export class CaseService {
           radicado: '11001234500120230001',
           processType: 'Ejecutivo',
           court: 'Juzgado 1',
-          city: 'Bogotá',
-          filedAt: addDays(-60),
-          observations: ''
-        } as any,
-        partiesInfo: [],
-        financialInfo: { capital: 15000000, obligations: 'Hipotecario', fngFag: false } as any,
-        measures: { embargo: true, embargoDate: addDays(5) } as any,
-        stages: { paymentOrder: true } as any,
-        auction: {} as any,
-        closure: {} as any
+          city: 'Bogotá'
+        },
+        partiesInfo: [
+          {
+            processRole: 'DEMANDADO',
+            person: 'Juan Pérez Gómez | CC | 1012345678'
+          }
+        ],
+        financialInfo: {
+          capital: 15000000,
+          obligations: 'Pagaré: PG-2025-001',
+          fngFag: false
+        },
+        measures: {
+          embargo: true,
+          embargoDate: addDays(5)
+        },
+        stages: {
+          paymentOrder: true,
+          firstInstanceDate: addDays(20)
+        },
+        auction: {},
+        closure: {},
+        processStages: [
+          {
+            id: 1,
+            createdAt: addDays(-10),
+            stageName: 'Mandamiento de pago',
+            subStageName: 'Admisión',
+            observation: 'Se registra mandamiento de pago y se valida información inicial del expediente.'
+          },
+          {
+            id: 2,
+            createdAt: addDays(-5),
+            stageName: 'Notificación',
+            subStageName: 'Pendiente notificación personal',
+            observation: 'Se encuentra pendiente la notificación del demandado.'
+          }
+        ],
+        proceduralNotes: [
+          {
+            id: 1,
+            createdAt: addDays(-3),
+            text: 'Se revisó el estado del proceso y queda pendiente seguimiento a notificación.'
+          }
+        ]
       },
       {
         id: 2,
@@ -123,16 +192,35 @@ export class CaseService {
           radicado: '76001234500220230002',
           processType: 'Ordinario',
           court: 'Juzgado 5',
-          city: 'Cali',
-          filedAt: addDays(-30),
-          observations: ''
-        } as any,
-        partiesInfo: [],
-        financialInfo: { capital: 5000000 } as any,
-        measures: {} as any,
-        stages: { firstInstanceDate: addDays(20) } as any,
-        auction: {} as any,
-        closure: {} as any
+          city: 'Cali'
+        },
+        partiesInfo: [
+          {
+            processRole: 'DEMANDADO',
+            person: 'María Rodríguez López | CC | 52999888'
+          }
+        ],
+        financialInfo: {
+          capital: 5000000,
+          obligations: 'Contrato: CT-2024-778',
+          fngFag: false
+        },
+        measures: {},
+        stages: {
+          firstInstanceDate: addDays(20)
+        },
+        auction: {},
+        closure: {},
+        processStages: [
+          {
+            id: 1,
+            createdAt: addDays(-12),
+            stageName: 'Presentación demanda',
+            subStageName: 'Radicación',
+            observation: 'Demanda presentada y radicada correctamente.'
+          }
+        ],
+        proceduralNotes: []
       },
       {
         id: 3,
@@ -140,67 +228,38 @@ export class CaseService {
           radicado: '05001234500320230003',
           processType: 'Ejecutivo',
           court: 'Juzgado 3',
-          city: 'Medellín',
-          filedAt: addDays(-10),
-          observations: ''
-        } as any,
-        partiesInfo: [],
-        financialInfo: { capital: 9000000 } as any,
-        measures: {} as any,
-        stages: {} as any,
-        auction: { auctionDate: addDays(60) } as any,
-        closure: {} as any
-      },
-      {
-        id: 4,
-        process: {
-          radicado: '08001234500420230004',
-          processType: 'Ordinario',
-          court: 'Juzgado 2',
-          city: 'Barranquilla',
-          filedAt: addDays(-5),
-          observations: ''
-        } as any,
-        partiesInfo: [],
-        financialInfo: { capital: 3000000 } as any,
-        measures: {} as any,
-        stages: {} as any,
-        auction: {} as any,
-        closure: {} as any
-      },
-      {
-        id: 5,
-        process: {
-          radicado: '08001234500420260004',
-          processType: 'Ordinario',
-          court: 'Juzgado 2',
-          city: 'Barranquilla',
-          filedAt: addDays(-1),
-          observations: ''
-        } as any,
-        partiesInfo: [],
-        financialInfo: { capital: 3000000 } as any,
-        measures: {} as any,
-        stages: {} as any,
-        auction: {} as any,
-        closure: {} as any
-      },
-      {
-        id: 6,
-        process: {
-          radicado: '08001234500420260014',
-          processType: 'Ordinario',
-          court: 'Juzgado 1',
-          city: 'Bogotá',
-          filedAt: addDays(-2),
-          observations: ''
-        } as any,
-        partiesInfo: [],
-        financialInfo: { capital: 3000000 } as any,
-        measures: {} as any,
-        stages: {} as any,
-        auction: {} as any,
-        closure: {} as any
+          city: 'Medellín'
+        },
+        partiesInfo: [
+          {
+            processRole: 'DEMANDADO',
+            person: 'Carlos Alberto Mejía | CE | 88776655'
+          }
+        ],
+        financialInfo: {
+          capital: 9000000,
+          obligations: 'Letra: LT-2023-459',
+          fngFag: true
+        },
+        measures: {},
+        stages: {},
+        auction: {
+          auctionDate: addDays(60)
+        },
+        closure: {},
+        processStages: [],
+        proceduralNotes: [
+          {
+            id: 1,
+            createdAt: addDays(-1),
+            text: 'Se solicitó verificación de medidas cautelares.'
+          },
+          {
+            id: 2,
+            createdAt: addDays(-1),
+            text: 'Pendiente confirmar respuesta del despacho.'
+          }
+        ]
       }
     ];
   }
