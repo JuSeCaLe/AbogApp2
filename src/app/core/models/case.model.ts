@@ -56,6 +56,7 @@ export interface ClosureInfo {
 
 export interface Case {
   id: number;
+  createdAt?: string;
   process: ProcessInfo;
   partiesInfo: PartyInfo[];
   financialInfo?: FinancialInfo;

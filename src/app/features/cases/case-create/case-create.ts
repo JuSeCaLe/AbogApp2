@@ -66,6 +66,13 @@ export class CaseCreate implements OnInit {
     this.plaintiffTypeService.refresh().subscribe(r => this.plaintiffs = r);
     this.obligationTypeService.refresh().subscribe(r => this.obligationTypes = r);
 
+    this.caseForm.get('process.court')!.valueChanges.subscribe((courtName: string) => {
+      const found = this.courts.find(c => c.name === courtName);
+      if (found) {
+        this.caseForm.get('process.city')!.setValue(found.city, { emitEvent: false });
+      }
+    });
+
     // Default: al menos 1 obligación
     if (this.obligationsItemsArray.length === 0) this.addObligationItem();
 
@@ -84,7 +91,7 @@ export class CaseCreate implements OnInit {
         radicado: ['', Validators.required],
         processType: [null, Validators.required],
         court: [null, Validators.required],
-        city: ['', Validators.required],
+        city: [''],
         filedAt: [null, Validators.required]
       }),
 
@@ -307,6 +314,12 @@ export class CaseCreate implements OnInit {
 
   cancel() {
     this.router.navigate(['/cases']);
+  }
+
+  get formattedCapital(): string {
+    const val = Number(this.caseForm.get('financialInfo.capital')?.value);
+    if (!val || isNaN(val)) return '';
+    return val.toLocaleString('es-CO');
   }
 
   private toDate(value: any): Date | null {
