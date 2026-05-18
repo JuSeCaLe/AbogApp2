@@ -1,52 +1,55 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { Case } from '../models/case.model';
-import { CaseProcessStage, CaseProceduralNote } from '../models/case.model';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { Case, CaseProcessStage, CaseProceduralNote } from '../models/case.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CaseService {
-  private cases$ = new BehaviorSubject<Case[]>(this.generateCases());
+  private readonly baseUrl = `${environment.apiUrl}/cases`;
+
+  constructor(private http: HttpClient) {}
 
   getCases(): Observable<Case[]> {
-    return of(this.enrich(this.cases$.value));
+    return this.http.get<Case[]>(this.baseUrl).pipe(map(cases => this.enrich(cases)));
   }
 
   getCaseById(id: number): Observable<Case | undefined> {
-    const found = this.cases$.value.find(c => c.id === id);
-    return of(found ? this.enrich([found])[0] : undefined);
+    return this.http.get<Case>(`${this.baseUrl}/${id}`).pipe(map(c => this.enrich([c])[0]));
   }
 
   searchByRadicado(radicado: string): Observable<Case[]> {
-    const term = radicado.trim();
-    const filtered = this.cases$.value.filter(c =>
-      c.process?.radicado?.includes(term)
-    );
-    return of(this.enrich(filtered));
+    const params = new HttpParams().set('radicado', radicado.trim());
+    return this.http.get<Case[]>(`${this.baseUrl}/search`, { params }).pipe(map(cases => this.enrich(cases)));
   }
 
   createCase(c: Case): Observable<Case> {
-    const current = this.cases$.value;
-
-    const nextId =
-      current.length > 0 ? Math.max(...current.map(x => x.id), 0) + 1 : 1;
-
-    c.id = nextId;
-
-    this.cases$.next([...current, c]);
-    return of(c);
+    return this.http.post<Case>(this.baseUrl, this.toRequest(c)).pipe(map(created => this.enrich([created])[0]));
   }
 
   updateCase(c: Case): Observable<Case> {
-    const updated = this.cases$.value.map(x => x.id === c.id ? c : x);
-    this.cases$.next(updated);
-    return of(c);
+    return this.http.put<Case>(`${this.baseUrl}/${c.id}`, this.toRequest(c)).pipe(map(updated => this.enrich([updated])[0]));
+  }
+
+  addProcessStage(caseId: number, stage: CaseProcessStage): Observable<Case | undefined> {
+    return this.http.post<Case>(`${this.baseUrl}/${caseId}/stages`, {
+      stageName: stage.stageName,
+      subStageName: stage.subStageName,
+      observation: stage.observation
+    }).pipe(map(c => this.enrich([c])[0]));
+  }
+
+  addProceduralNote(caseId: number, note: CaseProceduralNote): Observable<Case | undefined> {
+    return this.http.post<Case>(`${this.baseUrl}/${caseId}/notes`, {
+      text: note.text
+    }).pipe(map(c => this.enrich([c])[0]));
   }
 
   // ===============================
-  // ALERT LOGIC
+  // ALERT LOGIC (computed on frontend)
   // ===============================
 
   private enrich(cases: Case[]): Case[] {
@@ -87,180 +90,19 @@ export class CaseService {
     return 'green';
   }
 
-  addProcessStage(caseId: number, stage: CaseProcessStage): Observable<Case | undefined> {
-    const current = this.cases$.value;
-
-    const updated = current.map(c => {
-      if (c.id !== caseId) return c;
-
-      return {
-        ...c,
-        processStages: [...(c.processStages ?? []), stage]
-      };
-    });
-
-    this.cases$.next(updated);
-    return this.getCaseById(caseId);
-  }
-
-  addProceduralNote(caseId: number, note: CaseProceduralNote): Observable<Case | undefined> {
-    const current = this.cases$.value;
-
-    const updated = current.map(c => {
-      if (c.id !== caseId) return c;
-
-      return {
-        ...c,
-        proceduralNotes: [...(c.proceduralNotes ?? []), note]
-      };
-    });
-
-    this.cases$.next(updated);
-    return this.getCaseById(caseId);
-  }
-
   // ===============================
-  // DATA GENERATOR
+  // HELPERS
   // ===============================
 
-  private generateCases(): Case[] {
-    const today = new Date();
-
-    const addDays = (d: number) => {
-      const date = new Date(today);
-      date.setDate(today.getDate() + d);
-      return date.toISOString().substring(0, 10);
+  private toRequest(c: Case) {
+    return {
+      process: c.process,
+      partiesInfo: c.partiesInfo,
+      financialInfo: c.financialInfo ?? null,
+      measures: c.measures ?? null,
+      stages: c.stages ?? null,
+      auction: c.auction ?? null,
+      closure: c.closure ?? null
     };
-
-    return [
-      {
-        id: 1,
-        process: {
-          radicado: '11001234500120230001',
-          processType: 'Ejecutivo',
-          court: 'Juzgado 1',
-          city: 'Bogotá'
-        },
-        partiesInfo: [
-          {
-            processRole: 'DEMANDADO',
-            person: 'Juan Pérez Gómez | CC | 1012345678'
-          }
-        ],
-        financialInfo: {
-          capital: 15000000,
-          obligations: 'Pagaré: PG-2025-001',
-          fngFag: false
-        },
-        measures: {
-          embargo: true,
-          embargoDate: addDays(5)
-        },
-        stages: {
-          paymentOrder: true,
-          firstInstanceDate: addDays(20)
-        },
-        auction: {},
-        closure: {},
-        processStages: [
-          {
-            id: 1,
-            createdAt: addDays(-10),
-            stageName: 'Mandamiento de pago',
-            subStageName: 'Admisión',
-            observation: 'Se registra mandamiento de pago y se valida información inicial del expediente.'
-          },
-          {
-            id: 2,
-            createdAt: addDays(-5),
-            stageName: 'Notificación',
-            subStageName: 'Pendiente notificación personal',
-            observation: 'Se encuentra pendiente la notificación del demandado.'
-          }
-        ],
-        proceduralNotes: [
-          {
-            id: 1,
-            createdAt: addDays(-3),
-            text: 'Se revisó el estado del proceso y queda pendiente seguimiento a notificación.'
-          }
-        ]
-      },
-      {
-        id: 2,
-        process: {
-          radicado: '76001234500220230002',
-          processType: 'Ordinario',
-          court: 'Juzgado 5',
-          city: 'Cali'
-        },
-        partiesInfo: [
-          {
-            processRole: 'DEMANDADO',
-            person: 'María Rodríguez López | CC | 52999888'
-          }
-        ],
-        financialInfo: {
-          capital: 5000000,
-          obligations: 'Contrato: CT-2024-778',
-          fngFag: false
-        },
-        measures: {},
-        stages: {
-          firstInstanceDate: addDays(20)
-        },
-        auction: {},
-        closure: {},
-        processStages: [
-          {
-            id: 1,
-            createdAt: addDays(-12),
-            stageName: 'Presentación demanda',
-            subStageName: 'Radicación',
-            observation: 'Demanda presentada y radicada correctamente.'
-          }
-        ],
-        proceduralNotes: []
-      },
-      {
-        id: 3,
-        process: {
-          radicado: '05001234500320230003',
-          processType: 'Ejecutivo',
-          court: 'Juzgado 3',
-          city: 'Medellín'
-        },
-        partiesInfo: [
-          {
-            processRole: 'DEMANDADO',
-            person: 'Carlos Alberto Mejía | CE | 88776655'
-          }
-        ],
-        financialInfo: {
-          capital: 9000000,
-          obligations: 'Letra: LT-2023-459',
-          fngFag: true
-        },
-        measures: {},
-        stages: {},
-        auction: {
-          auctionDate: addDays(60)
-        },
-        closure: {},
-        processStages: [],
-        proceduralNotes: [
-          {
-            id: 1,
-            createdAt: addDays(-1),
-            text: 'Se solicitó verificación de medidas cautelares.'
-          },
-          {
-            id: 2,
-            createdAt: addDays(-1),
-            text: 'Pendiente confirmar respuesta del despacho.'
-          }
-        ]
-      }
-    ];
   }
 }
