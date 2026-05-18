@@ -1,20 +1,35 @@
 <h2 mat-dialog-title>Nueva etapa del proceso</h2>
 
-<mat-dialog-content [formGroup]="form" style="display:grid; gap:12px; min-width:420px;">
+<mat-dialog-content [formGroup]="form" style="display:grid; gap:16px; min-width:clamp(300px, 50vw, 460px); padding-top:8px;">
+
   <mat-form-field appearance="outline">
-    <mat-label>Etapa</mat-label>
-    <input matInput formControlName="stageName">
+    <mat-label>Fecha de la etapa</mat-label>
+    <input matInput [matDatepicker]="picker" formControlName="stageDate">
+    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+    <mat-error *ngIf="form.get('stageDate')?.hasError('required')">La fecha es obligatoria</mat-error>
   </mat-form-field>
 
   <mat-form-field appearance="outline">
+    <mat-label>Etapa</mat-label>
+    <mat-select formControlName="stageId" [disabled]="filteredStages.length === 0">
+      <mat-option *ngFor="let s of filteredStages" [value]="s.id">{{ s.name }}</mat-option>
+    </mat-select>
+    <mat-error *ngIf="form.get('stageId')?.hasError('required')">Seleccione la etapa</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" *ngIf="hasSubStages">
     <mat-label>Subetapa</mat-label>
-    <input matInput formControlName="subStageName">
+    <mat-select formControlName="subStageId">
+      <mat-option *ngFor="let ss of filteredSubStages" [value]="ss.id">{{ ss.name }}</mat-option>
+    </mat-select>
   </mat-form-field>
 
   <mat-form-field appearance="outline">
     <mat-label>Observación</mat-label>
     <textarea matInput rows="3" formControlName="observation"></textarea>
   </mat-form-field>
+
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

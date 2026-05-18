@@ -319,3 +319,64 @@ mat-nav-list a.nav-active mat-icon{
 .confirm-dialog-panel .mat-mdc-dialog-actions button + button {
   margin-left: 8px;
 }
+
+/* ===============================
+   ALERT BADGES
+   =============================== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-red    { background: rgba(197, 22, 22, 0.12); color: #c51616; }
+.badge-orange { background: rgba(227, 100, 15, 0.12); color: #e3640f; }
+.badge-green  { background: rgba(31, 134, 70, 0.12);  color: #1f8646; }
+
+/* ===============================
+   RESPONSIVE UTILITIES
+   =============================== */
+
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.table-scroll-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dialog-grid {
+  display: grid;
+  gap: 16px;
+  min-width: 460px;
+  padding-top: 8px;
+}
+
+@media (max-width: 767px) {
+  .grid-2col {
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-grid {
+    min-width: unset;
+    width: calc(100vw - 64px);
+  }
+
+  .page-container {
+    padding: 8px !important;
+  }
+
+  /* Full-width dialogs on mobile */
+  .cdk-overlay-pane {
+    max-width: 95vw !important;
+  }
+}

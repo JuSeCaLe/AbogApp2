@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CaseService } from '../../../core/services/case.service';
 import { Case, CaseProcessStage, CaseProceduralNote } from '../../../core/models/case.model';
@@ -23,6 +23,7 @@ export class CaseEdit implements OnInit {
     private route: ActivatedRoute,
     private caseService: CaseService,
     private dialog: MatDialog,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -33,24 +34,27 @@ export class CaseEdit implements OnInit {
   loadCase(): void {
     this.caseService.getCaseById(this.caseId).subscribe(c => {
       this.caseData = c;
+      this.cdr.detectChanges();
     });
   }
 
   addStage(): void {
-    const ref = this.dialog.open(ProcessStageDialog);
+    const ref = this.dialog.open(ProcessStageDialog, {
+      data: { processType: this.caseData?.process?.processType ?? '' }
+    });
 
     ref.afterClosed().subscribe(result => {
       if (!result) return;
 
-      const observation: CaseProcessStage = {
-        id: Date.now(),
-        createdAt: new Date().toISOString().substring(0, 10),
+      const stage: CaseProcessStage = {
+        id: 0,
+        createdAt: result.stageDate,
         stageName: result.stageName,
-        subStageName: result.subStageName,
+        subStageName: result.subStageName ?? '',
         observation: result.observation
       };
 
-      this.caseService.addProcessStage(this.caseId, observation)
+      this.caseService.addProcessStage(this.caseId, stage)
         .subscribe(() => this.loadCase());
     });
   }
@@ -62,8 +66,8 @@ export class CaseEdit implements OnInit {
       if (!result) return;
 
       const note: CaseProceduralNote = {
-        id: Date.now(),
-        createdAt: new Date().toISOString().substring(0, 10),
+        id: 0,
+        createdAt: result.noteDate ?? new Date().toISOString().substring(0, 10),
         text: result.text
       };
 
@@ -74,7 +78,6 @@ export class CaseEdit implements OnInit {
 
   get defendantText(): string {
     const parties = this.caseData?.partiesInfo as any[];
-
     const defendant = parties?.find(p => p.processRole === 'DEMANDADO');
     return defendant?.person ?? 'Demandado no registrado';
   }

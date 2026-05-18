@@ -1,10 +1,21 @@
 <h2 mat-dialog-title>Nueva nota</h2>
 
-<mat-dialog-content [formGroup]="form" style="display:grid; gap:12px; min-width:420px;">
+<mat-dialog-content [formGroup]="form" style="display:grid; gap:16px; min-width:clamp(280px, 50vw, 420px); padding-top:8px;">
+
+  <mat-form-field appearance="outline">
+    <mat-label>Fecha de la nota</mat-label>
+    <input matInput [matDatepicker]="notePicker" formControlName="noteDate">
+    <mat-datepicker-toggle matIconSuffix [for]="notePicker"></mat-datepicker-toggle>
+    <mat-datepicker #notePicker></mat-datepicker>
+    <mat-error *ngIf="form.get('noteDate')?.hasError('required')">La fecha es obligatoria</mat-error>
+  </mat-form-field>
+
   <mat-form-field appearance="outline">
     <mat-label>Nota</mat-label>
     <textarea matInput rows="4" formControlName="text"></textarea>
+    <mat-error *ngIf="form.get('text')?.hasError('required')">La nota es obligatoria</mat-error>
   </mat-form-field>
+
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

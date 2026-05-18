@@ -15,6 +15,7 @@ export class ProceduralNoteDialog {
     private dialogRef: MatDialogRef<ProceduralNoteDialog>
   ) {
     this.form = this.fb.group({
+      noteDate: [new Date(), Validators.required],
       text: ['', Validators.required]
     });
   }
@@ -25,7 +26,13 @@ export class ProceduralNoteDialog {
       return;
     }
 
-    this.dialogRef.close(this.form.getRawValue());
+    const { noteDate, text } = this.form.getRawValue();
+
+    const dateStr = noteDate instanceof Date
+      ? noteDate.toISOString().substring(0, 10)
+      : String(noteDate).substring(0, 10);
+
+    this.dialogRef.close({ noteDate: dateStr, text });
   }
 
   cancel() {

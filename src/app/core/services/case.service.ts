@@ -36,6 +36,7 @@ export class CaseService {
 
   addProcessStage(caseId: number, stage: CaseProcessStage): Observable<Case | undefined> {
     return this.http.post<Case>(`${this.baseUrl}/${caseId}/stages`, {
+      stageDate: stage.createdAt,
       stageName: stage.stageName,
       subStageName: stage.subStageName,
       observation: stage.observation
@@ -51,6 +52,19 @@ export class CaseService {
   // ===============================
   // ALERT LOGIC (computed on frontend)
   // ===============================
+  //
+  // Reference date = date of the most recent process stage,
+  // or the case's own createdAt if no stages exist yet.
+  //
+  // Days elapsed = today − reference date.
+  // daysInMonth  = number of days in the reference date's calendar month.
+  //
+  //   green  (Al día)          : elapsed ≤ 25
+  //   orange (Próximos a vencer): 25 < elapsed ≤ daysInMonth
+  //   red    (Vencido)         : elapsed > daysInMonth
+  //
+  // nextDueDate is set to (refDate + daysInMonth) so callers can compute
+  // days-until-expiry (positive = days left; negative = days overdue).
 
   private enrich(cases: Case[]): Case[] {
     return cases.map(c => ({
@@ -60,34 +74,44 @@ export class CaseService {
     }));
   }
 
+  private getRefDate(c: Case): Date | null {
+    const stages = c.processStages;
+    if (stages && stages.length > 0) {
+      const latest = [...stages].sort((a, b) =>
+        a.createdAt < b.createdAt ? 1 : -1
+      )[0];
+      const d = new Date(latest.createdAt);
+      return isNaN(d.getTime()) ? null : d;
+    }
+    if (c.createdAt) {
+      const d = new Date(c.createdAt);
+      return isNaN(d.getTime()) ? null : d;
+    }
+    return null;
+  }
+
   private getNextDate(c: Case): Date | null {
-    const dates: string[] = [];
-
-    if (c.measures?.embargoDate) dates.push(c.measures.embargoDate);
-    if ((c.stages as any)?.firstInstanceDate) dates.push((c.stages as any).firstInstanceDate);
-    if ((c.stages as any)?.secondInstanceDate) dates.push((c.stages as any).secondInstanceDate);
-    if ((c.auction as any)?.auctionDate) dates.push((c.auction as any).auctionDate);
-    if ((c.auction as any)?.awardDate) dates.push((c.auction as any).awardDate);
-    if ((c.closure as any)?.deliveryDate) dates.push((c.closure as any).deliveryDate);
-
-    if (!dates.length) return null;
-
-    return new Date(
-      dates.map(d => new Date(d).getTime()).sort((a, b) => a - b)[0]
-    );
+    const ref = this.getRefDate(c);
+    if (!ref) return null;
+    const daysInMonth = new Date(ref.getFullYear(), ref.getMonth() + 1, 0).getDate();
+    return new Date(ref.getTime() + daysInMonth * 86400000);
   }
 
   private getAlertColor(c: Case): 'red' | 'orange' | 'green' {
-    const next = this.getNextDate(c);
-    if (!next) return 'green';
+    const ref = this.getRefDate(c);
+    if (!ref) return 'green';
 
-    const days = Math.floor(
-      (next.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const refDay = new Date(ref);
+    refDay.setHours(0, 0, 0, 0);
 
-    if (days <= 7) return 'red';
-    if (days <= 30) return 'orange';
-    return 'green';
+    const elapsed = Math.floor((today.getTime() - refDay.getTime()) / 86400000);
+    const daysInMonth = new Date(refDay.getFullYear(), refDay.getMonth() + 1, 0).getDate();
+
+    if (elapsed <= 25) return 'green';
+    if (elapsed <= daysInMonth) return 'orange';
+    return 'red';
   }
 
   // ===============================

@@ -24,3 +24,16 @@ mat-form-field {
   gap: 8px;
   margin-bottom: 8px;
 }
+
+.obligation-row {
+  display: grid;
+  grid-template-columns: 280px 1fr 120px;
+  gap: 12px;
+  align-items: center;
+}
+
+@media (max-width: 767px) {
+  .obligation-row {
+    grid-template-columns: 1fr;
+  }
+}

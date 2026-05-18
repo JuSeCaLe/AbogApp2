@@ -99,20 +99,15 @@ export class Cases implements OnInit, AfterViewInit {
     return c.processStages?.length ?? 0;
   }
 
-  getAlertColor(c: Case): string {
-    const capital = c.financialInfo?.capital ?? 0;
-
-    if (capital >= 10_000_000) return 'var(--danger)';
-    if (capital >= 5_000_000) return 'var(--warning)';
-    return 'var(--success)';
+  getAlertClass(c: Case): 'red' | 'orange' | 'green' {
+    return (c as any).alertColor ?? 'green';
   }
 
   getAlertLabel(c: Case): string {
-    const capital = c.financialInfo?.capital ?? 0;
-
-    if (capital >= 10_000_000) return 'CRÍTICO';
-    if (capital >= 5_000_000) return 'ALERTA';
-    return 'NORMAL';
+    const color = (c as any).alertColor;
+    if (color === 'red') return 'Vencido';
+    if (color === 'orange') return 'Por vencer';
+    return 'Al día';
   }
 
   editCase(c: Case) {
