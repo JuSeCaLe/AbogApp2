@@ -120,6 +120,7 @@ export class CaseService {
 
   private toRequest(c: Case) {
     return {
+      demandanteRoleId: c.demandanteRoleId,
       process: c.process,
       partiesInfo: c.partiesInfo,
       financialInfo: c.financialInfo ?? null,

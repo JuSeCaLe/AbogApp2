@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 import { SecurityRoutingModule } from './security-routing.module';
 import { RoleForm } from './roles/pages/role-form/role-form';
@@ -19,6 +20,7 @@ import { MaterialModule } from '../../shared/material.module';
   ],
   imports: [
     CommonModule,
+    RouterModule,
     SecurityRoutingModule,
     ReactiveFormsModule,
     FormsModule,

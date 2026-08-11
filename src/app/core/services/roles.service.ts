@@ -37,13 +37,13 @@ export class RolesService {
     return this.http.get<Role>(`${this.apiBase}/Roles/${id}`);
   }
 
-  create(payload: Pick<Role, 'name' | 'description' | 'active'>): Observable<Role> {
+  create(payload: Pick<Role, 'name' | 'description' | 'active' | 'isDemandante'>): Observable<Role> {
     return this.http.post<Role>(`${this.apiBase}/Roles`, payload).pipe(
       tap(created => this._roles$.next([created, ...this._roles$.value]))
     );
   }
 
-  update(id: string, role: Pick<Role, 'name' | 'description' | 'active'>): Observable<void> {
+  update(id: string, role: Pick<Role, 'name' | 'description' | 'active' | 'isDemandante'>): Observable<void> {
       return this.http.put<void>(`${this.apiBase}/Roles/${id}`, role).pipe(
       tap(() => this.refresh().subscribe())
     );

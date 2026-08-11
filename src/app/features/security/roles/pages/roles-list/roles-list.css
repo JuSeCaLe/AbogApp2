@@ -1,0 +1,9 @@
+.demandante-badge {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  background: #e3f2fd;
+  color: #1565c0;
+  white-space: nowrap;
+}

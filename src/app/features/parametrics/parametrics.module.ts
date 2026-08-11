@@ -4,12 +4,10 @@ import { CommonModule } from '@angular/common';
 import { ParametricsRoutingModule } from './parametrics.routing.module';
 import { CourtForm } from './courts/court-form/court-form';
 import { CourtsList } from './courts/courts-list/courts-list';
-import { PlaintiffForm } from './plaintiffs/plaintiff-form/plaintiff-form';
 import { ObligationTypeList } from './obligation-types/obligation-types-list/obligation-types-list';
 import { ObligationTypeForm } from './obligation-types/obligation-types-form/obligation-types-form';
 import { ProcessTypeForm } from './process-types/process-types-form/process-types-form';
 import { ProcessTypeList } from './process-types/process-types-list/process-types-list';
-import { PlaintiffsList } from './plaintiffs/plaintiffs-list/plaintiffs-list';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from '../../shared/material.module';
 
@@ -17,8 +15,6 @@ import { MaterialModule } from '../../shared/material.module';
   declarations: [
     CourtForm,
     CourtsList,
-    PlaintiffForm,
-    PlaintiffsList,
     ObligationTypeForm,
     ObligationTypeList,
     ProcessTypeForm,

@@ -57,12 +57,16 @@
     <mat-card-title style="padding:16px 16px 0 16px;">Partes</mat-card-title>
     <mat-card-content style="display:grid; gap:12px; padding-top:12px;">
 
+      <div *ngIf="demandanteSelectionError" class="mat-error" style="margin-bottom:8px;">
+        {{ demandanteSelectionError }}
+      </div>
+
       <mat-form-field appearance="outline">
-        <mat-label>Demandante (Banco)</mat-label>
-        <mat-select formControlName="plaintiffId">
-          <mat-option *ngFor="let p of plaintiffs" [value]="p.id">{{ p.name }}</mat-option>
+        <mat-label>Demandante</mat-label>
+        <mat-select formControlName="demandanteRoleId">
+          <mat-option *ngFor="let d of demandanteRoles" [value]="d.id">{{ d.name }}</mat-option>
         </mat-select>
-        <mat-error *ngIf="caseForm.get('partiesInfo.plaintiffId')?.touched && caseForm.get('partiesInfo.plaintiffId')?.invalid">
+        <mat-error *ngIf="caseForm.get('partiesInfo.demandanteRoleId')?.touched && caseForm.get('partiesInfo.demandanteRoleId')?.invalid">
           Demandante es requerido
         </mat-error>
       </mat-form-field>

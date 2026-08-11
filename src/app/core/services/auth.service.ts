@@ -4,11 +4,18 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+export interface DemandanteInfo {
+  id: string;
+  name: string;
+}
+
 export interface UserMe {
   id: string;
   email: string;
   userName: string;
   roles: string[];
+  demandanteIds: string[];
+  demandantes: DemandanteInfo[];
 }
 
 type LoginResponse = {
@@ -16,6 +23,8 @@ type LoginResponse = {
   expiresIn: number;
   user: { id: string; email: string; userName: string };
   roles: string[];
+  demandanteIds: string[];
+  demandantes: DemandanteInfo[];
 };
 
 @Injectable({ providedIn: 'root' })
@@ -42,7 +51,9 @@ export class AuthService {
           id: res.user.id,
           email: res.user.email,
           userName: res.user.userName,
-          roles: res.roles ?? []
+          roles: res.roles ?? [],
+          demandanteIds: res.demandanteIds ?? [],
+          demandantes: res.demandantes ?? []
         });
       })
     );
@@ -83,5 +94,12 @@ export class AuthService {
     if (!u) return false;
     const roles = u.roles ?? [];
     return roleIds.some(r => roles.includes(r));
+  }
+
+  // true si el usuario no es admin y tiene uno o más demandantes vinculados:
+  // solo debe ver/crear casos de esos demandantes (ver CaseCreate/CasesController).
+  get isScopedToPlaintiff(): boolean {
+    const u = this._user$.value;
+    return !!u && !this.hasRole('r-admin') && (u.demandantes?.length ?? 0) > 0;
   }
 }

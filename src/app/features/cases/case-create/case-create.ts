@@ -10,10 +10,12 @@ import { CourtsService } from '../../../core/services/court.service';
 import { ProcessTypeService } from '../../../core/services/process-type.service';
 import { Court } from '../../../core/models/court.model';
 import { ProcessType } from '../../../core/models/process-type.model';
-import { PlaintiffsService } from '../../../core/services/plaintiff.service';
+import { RolesService } from '../../../core/services/roles.service';
 import { ObligationTypeService } from '../../../core/services/obligation-type.service';
-import { Plaintiff } from '../../../core/models/plaintiff.model';
 import { ObligationType } from '../../../core/models/obligation-type.model';
+import { AuthService } from '../../../core/services/auth.service';
+
+type DemandanteRoleOption = { id: string; name: string };
 
 type ObligationItem = { obligationType: string; number: string };
 
@@ -34,8 +36,8 @@ export class CaseCreate implements OnInit {
   // ya lo tenías, lo dejo por si en otras pantallas lo usan
   persons: Person[] = [];
 
-  // NUEVO: demandantes (bancos) y tipos de obligación (parametrizados)
-  plaintiffs: Plaintiff[] = [];
+  // NUEVO: roles-demandante (bancos) y tipos de obligación (parametrizados)
+  demandanteRoles: DemandanteRoleOption[] = [];
   obligationTypes: ObligationType[] = [];
 
   constructor(
@@ -44,12 +46,18 @@ export class CaseCreate implements OnInit {
     private catalogService: CatalogService,
     private courtService: CourtsService,
     private processTypeService: ProcessTypeService,
-    private plaintiffTypeService: PlaintiffsService,
+    private rolesService: RolesService,
     private obligationTypeService: ObligationTypeService,
     private personService: PersonService,
+    private auth: AuthService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
+
+  // true si el usuario no es admin y está restringido a su(s) rol(es)-demandante:
+  // no puede ver el catálogo completo (endpoint admin-only), se le arma
+  // la lista con lo que ya viene en su sesión.
+  demandanteSelectionError = '';
 
   ngOnInit() {
     this.buildForm();
@@ -62,8 +70,7 @@ export class CaseCreate implements OnInit {
     // Personas existentes (lo dejamos, aunque el MVP no lo requiere)
     this.personService.getPersons().subscribe(r => this.persons = r);
 
-    // Catálogos nuevos (deben existir en CatalogService; si no, te digo abajo cómo agregarlos)
-    this.plaintiffTypeService.refresh().subscribe(r => this.plaintiffs = r);
+    this.loadDemandanteRoles();
     this.obligationTypeService.refresh().subscribe(r => this.obligationTypes = r);
 
     this.caseForm.get('process.court')!.valueChanges.subscribe((courtName: string) => {
@@ -85,6 +92,32 @@ export class CaseCreate implements OnInit {
     }
   }
 
+  // Un admin ve el catálogo completo de roles-demandante (vía /Roles, admin-only).
+  // Un usuario con un rol-demandante no puede llamar ese endpoint: se le arma
+  // la lista con lo que ya vino en su sesión (login/me) y, si tiene exactamente
+  // uno, se le preselecciona y bloquea el control.
+  private loadDemandanteRoles() {
+    if (this.auth.hasRole('r-admin')) {
+      this.rolesService.getAll().subscribe(roles => {
+        this.demandanteRoles = roles
+          .filter(r => r.isDemandante && r.active)
+          .map(r => ({ id: r.id, name: r.name }));
+      });
+      return;
+    }
+
+    const demandantes = this.auth.snapshot?.demandantes ?? [];
+    this.demandanteRoles = demandantes.map(d => ({ id: d.id, name: d.name }));
+
+    const demandanteRoleIdCtrl = this.caseForm.get('partiesInfo.demandanteRoleId');
+    if (demandantes.length === 1) {
+      demandanteRoleIdCtrl?.setValue(demandantes[0].id);
+      demandanteRoleIdCtrl?.disable();
+    } else if (demandantes.length === 0) {
+      this.demandanteSelectionError = 'Su usuario no está vinculado a ningún rol de demandante. Contacte a un administrador.';
+    }
+  }
+
   buildForm() {
     this.caseForm = this.fb.group({
       process: this.fb.group({
@@ -97,7 +130,7 @@ export class CaseCreate implements OnInit {
 
       // MVP: demandante/demandado (sin romper partiesInfo existente)
       partiesInfo: this.fb.group({
-        plaintiffId: [null, Validators.required],
+        demandanteRoleId: [null, Validators.required],
         defendantName: ['', [Validators.required, Validators.minLength(3)]],
         defendantDocument: ['', [Validators.required, Validators.minLength(5)]],
         parties: this.fb.array([])
@@ -191,11 +224,15 @@ export class CaseCreate implements OnInit {
     // this.caseForm.get('closure.deliveryDate')?.setValue(this.toDate((c.closure as any)?.deliveryDate));
     // this.caseForm.get('closure.terminationDate')?.setValue(this.toDate((c.closure as any)?.terminationDate));
 
+    // demandante: ahora es un campo de primer nivel en Case (antes se derivaba de partiesInfo)
+    if (c.demandanteRoleId) {
+      this.caseForm.get('partiesInfo.demandanteRoleId')?.setValue(c.demandanteRoleId);
+    }
+
     // partiesInfo (si ya guardaste con este MVP)
     const pi: any = c.partiesInfo as any;
     if (pi && typeof pi === 'object' && pi.plaintiffId) {
       this.caseForm.get('partiesInfo')?.patchValue({
-        plaintiffId: pi.plaintiffId,
         defendantName: pi.defendantName,
         defendantDocument: pi.defendantDocument
       });
@@ -251,14 +288,13 @@ export class CaseCreate implements OnInit {
     // Construye partiesInfo compatible sin cambiar tu modelo base:
     // guardamos también una forma "objeto" para el MVP, sin romper si Case acepta any.
     const partiesInfoMvp = {
-      plaintiffId: v.partiesInfo.plaintiffId,
       defendantName: String(v.partiesInfo.defendantName).trim(),
       defendantDocument: String(v.partiesInfo.defendantDocument).trim()
     };
 
-    // además construimos array básico por si luego lo necesitas
+    // el demandante ahora viaja como Case.demandanteRoleId (campo de primer nivel);
+    // partiesInfo solo conserva al demandado (texto libre)
     const partiesInfoArray = [
-      { processRole: 'DEMANDANTE', person: String(v.partiesInfo.plaintiffId) },
       { processRole: 'DEMANDADO', person: `${partiesInfoMvp.defendantName} | ${partiesInfoMvp.defendantDocument}` }
     ];
 
@@ -274,6 +310,7 @@ export class CaseCreate implements OnInit {
 
     const caseToSave: Case = {
       id: this.editingId || 0,
+      demandanteRoleId: v.partiesInfo.demandanteRoleId,
 
       // process incluye filedAt/observations sin romper el resto
       process: {

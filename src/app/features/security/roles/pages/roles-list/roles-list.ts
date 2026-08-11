@@ -7,6 +7,8 @@ import { map, startWith } from 'rxjs/operators';
 import { RolesService } from '../../../../../core/services/roles.service';
 import { Role } from '../../../../../core/models/role.model';
 
+const SYSTEM_ROLE_NAMES = ['r-admin', 'r-user'];
+
 @Component({
   selector: 'app-roles-list',
   standalone: false,
@@ -71,11 +73,17 @@ export class RolesList implements OnInit {
     this.router.navigate(['/security/roles/new']);
   }
 
+  isSystemRole(role: Role): boolean {
+    return SYSTEM_ROLE_NAMES.includes(role.name);
+  }
+
   goEdit(role: Role): void {
+    if (this.isSystemRole(role)) return; // rol del sistema, no editable
     this.router.navigate(['/security/roles', role.id]);
   }
 
   remove(role: Role): void {
+    if (this.isSystemRole(role)) return; // rol del sistema, no eliminable
     this.rolesService.delete(role.id).subscribe({
       next: () => {},
       error: (e) => (this.error = e?.error?.message || 'No se pudo eliminar el rol'),

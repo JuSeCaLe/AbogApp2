@@ -60,6 +60,8 @@
       <mat-label>Selecciona roles</mat-label>
 
       <mat-select formControlName="roleIds" multiple>
+        <mat-select-trigger>{{ selectedRoleNames.join(', ') }}</mat-select-trigger>
+
         <!-- buscador dentro del panel -->
         <mat-option disabled>
           <mat-form-field appearance="outline" style="width:100%; margin:6px 0 0;">
@@ -69,9 +71,9 @@
         </mat-option>
 
         <mat-option *ngFor="let r of (filteredRoles$ | async) ?? []" [value]="r.name">
-          <div style="display:flex; flex-direction:column;">
+          <div style="display:flex; flex-direction:column; gap:4px;">
             <span>{{ r.name }}</span>
-            <small style="opacity:.75;" *ngIf="r.description">{{ r.description }}</small>
+            <small style="opacity:.75; font-style:italic;" *ngIf="r.description">{{ r.description }}</small>
           </div>
         </mat-option>
       </mat-select>

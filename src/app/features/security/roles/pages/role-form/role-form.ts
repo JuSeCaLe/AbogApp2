@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { RolesService } from '../../../../../core/services/roles.service';
 import { Role } from '../../../../../core/models/role.model';
 
+const SYSTEM_ROLE_NAMES = ['r-admin', 'r-user'];
 
 @Component({
   selector: 'app-role-form',
@@ -17,6 +18,8 @@ export class RoleForm implements OnInit {
 
   form!: FormGroup;
 
+  isSystemRole = false;
+
   constructor(
     private fb: FormBuilder,
     private rolesService: RolesService,
@@ -29,6 +32,7 @@ export class RoleForm implements OnInit {
       name: ['', [Validators.required, Validators.minLength(2)]],
       description: [''],
       active: [true],
+      isDemandante: [false],
     });
 
     this.id = this.route.snapshot.paramMap.get('id');
@@ -55,7 +59,13 @@ export class RoleForm implements OnInit {
       name: role.name,
       description: role.description ?? '',
       active: role.active,
+      isDemandante: role.isDemandante,
     });
+
+    this.isSystemRole = SYSTEM_ROLE_NAMES.includes(role.name);
+    if (this.isSystemRole) {
+      this.form.disable();
+    }
   }
 
   save(): void {

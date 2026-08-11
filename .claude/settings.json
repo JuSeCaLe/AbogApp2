@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet run *)",
+      "Bash(echo \"started pid $!\")",
+      "Bash(tail -60 /tmp/backend.log 2>&1)",
+      "Read(//tmp/**)",
+      "Bash(curl -s http://localhost:5050/api/Auth/ping)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5050/api/Auth/ping)",
+      "Bash(curl -s -i -X POST http://localhost:5050/api/Auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"demandante@abogapp.com\",\"password\":\"Demandante123!\"}')",
+      "Bash(tail -40 /tmp/backend.log)",
+      "Bash(grep -n \"fail:\\\\|Executed DbCommand\\\\|WITH\\\\|SELECT\" /tmp/backend.log | tail -60)",
+      "Bash(powershell -Command \"Stop-Process -Id 37688 -Force\")",
+      "Bash(nohup dotnet run --project Login.WebApi --no-launch-profile --urls \"http://localhost:5050\")",
+      "Bash(disown)",
+      "Bash(curl -s -o /dev/null -w \"ping status: %{http_code}\\\\n\" http://localhost:5050/api/Auth/ping)",
+      "Bash(grep -o '\"demandanteName\":\"[^\"]*\"' /tmp/user_cases.json)",
+      "Bash(tail -50 /tmp/backend2.log)",
+      "Bash(powershell -Command \"Get-Process -Name Login.WebApi -ErrorAction SilentlyContinue | Stop-Process -Force\")",
+      "Bash(powershell -Command \"Get-Process -Name Login.WebApi -ErrorAction SilentlyContinue | Select-Object Id,ProcessName\")",
+      "Bash(curl -s -o /dev/null -w \"puerto 5050 status: %{http_code}\\\\n\" http://localhost:5050/api/Auth/ping --max-time 2)",
+      "Bash(powershell -Command 'Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like '\\\\''*ng serve*'\\\\'' -or $_.CommandLine -like '\\\\''*@angular/cli*serve*'\\\\'' } | Select-Object ProcessId, CommandLine')",
+      "Bash(powershell -Command \"Stop-Process -Id 4348 -Force\")",
+      "Bash(nohup npx ng serve -c development)",
+      "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 4200 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique\")",
+      "Bash(powershell -Command \"Get-Process -Id 32336 | Select-Object Id,ProcessName,Path\")",
+      "Bash(powershell -Command \"Stop-Process -Id 32336 -Force\")",
+      "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 4200 -ErrorAction SilentlyContinue\")",
+      "Bash(powershell -Command 'Get-NetTCPConnection -LocalPort 5050 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }')",
+      "Bash(powershell -Command \"Stop-Process -Id 37008 -Force -ErrorAction SilentlyContinue\")"
+    ]
+  }
+}
