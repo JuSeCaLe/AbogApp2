@@ -3,6 +3,7 @@ export interface ProcessInfo {
   processType: string;
   court: string;
   city: string;
+  filedAt?: string;
 }
 
 export interface PartyInfo {

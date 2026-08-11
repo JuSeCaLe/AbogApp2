@@ -3,6 +3,25 @@
   gap: 20px;
 }
 
+/* ===== FILTROS ===== */
+.filters-card mat-card-content.filters-row {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 16px !important;
+}
+
+.filter-field {
+  width: 220px;
+}
+
+@media (max-width: 599px) {
+  .filter-field {
+    width: 100%;
+  }
+}
+
 /* ===== STAT CARDS ===== */
 .stats-grid {
   display: grid;
@@ -85,6 +104,9 @@
 
 .title-orange        { color: #e3640f; }
 .title-orange mat-icon { color: #e3640f !important; }
+
+.title-green        { color: #1f8646; }
+.title-green mat-icon { color: #1f8646 !important; }
 
 /* ===== BADGES ===== */
 .badge {

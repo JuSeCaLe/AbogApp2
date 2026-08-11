@@ -121,7 +121,9 @@ export class CaseCreate implements OnInit {
   buildForm() {
     this.caseForm = this.fb.group({
       process: this.fb.group({
-        radicado: ['', Validators.required],
+        // No es obligatorio al crear: muchos casos aún no tienen número de
+        // radicado asignado por el juzgado. Se completa luego en edición.
+        radicado: [''],
         processType: [null, Validators.required],
         court: [null, Validators.required],
         city: [''],
@@ -294,8 +296,10 @@ export class CaseCreate implements OnInit {
 
     // el demandante ahora viaja como Case.demandanteRoleId (campo de primer nivel);
     // partiesInfo solo conserva al demandado (texto libre)
+    // Formato estándar "Nombre|Tipo|Documento" (mismo criterio que usa el
+    // listado de casos y la exportación a Excel para separar nombre/cédula).
     const partiesInfoArray = [
-      { processRole: 'DEMANDADO', person: `${partiesInfoMvp.defendantName} | ${partiesInfoMvp.defendantDocument}` }
+      { processRole: 'DEMANDADO', person: `${partiesInfoMvp.defendantName}|CC|${partiesInfoMvp.defendantDocument}` }
     ];
 
     const filedAtStr = this.toYmd(v.process.filedAt);

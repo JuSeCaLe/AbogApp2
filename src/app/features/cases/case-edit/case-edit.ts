@@ -16,6 +16,10 @@ export class CaseEdit implements OnInit {
   caseId!: number;
   caseData?: Case;
 
+  editingRadicado = false;
+  radicadoDraft = '';
+  savingRadicado = false;
+
   displayedStageColumns = ['createdAt', 'stageName', 'subStageName', 'observation'];
   displayedNoteColumns = ['createdAt', 'text'];
 
@@ -35,6 +39,34 @@ export class CaseEdit implements OnInit {
     this.caseService.getCaseById(this.caseId).subscribe(c => {
       this.caseData = c;
       this.cdr.detectChanges();
+    });
+  }
+
+  startEditRadicado(): void {
+    this.radicadoDraft = this.caseData?.process?.radicado ?? '';
+    this.editingRadicado = true;
+  }
+
+  cancelEditRadicado(): void {
+    this.editingRadicado = false;
+  }
+
+  saveRadicado(): void {
+    if (!this.caseData) return;
+
+    const updated: Case = {
+      ...this.caseData,
+      process: { ...this.caseData.process, radicado: this.radicadoDraft.trim() }
+    };
+
+    this.savingRadicado = true;
+    this.caseService.updateCase(updated).subscribe({
+      next: () => {
+        this.savingRadicado = false;
+        this.editingRadicado = false;
+        this.loadCase();
+      },
+      error: () => { this.savingRadicado = false; }
     });
   }
 

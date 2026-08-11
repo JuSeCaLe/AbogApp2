@@ -10,11 +10,9 @@
     <mat-card-content style="display:grid; gap:12px; padding-top:12px;">
 
       <mat-form-field appearance="outline">
-        <mat-label>Radicado</mat-label>
+        <mat-label>Radicado (opcional)</mat-label>
         <input matInput formControlName="radicado">
-        <mat-error *ngIf="caseForm.get('process.radicado')?.touched && caseForm.get('process.radicado')?.invalid">
-          Radicado es requerido
-        </mat-error>
+        <mat-hint>Si aún no lo tienes, puedes completarlo luego al editar el caso</mat-hint>
       </mat-form-field>
 
       <div class="grid-2col">

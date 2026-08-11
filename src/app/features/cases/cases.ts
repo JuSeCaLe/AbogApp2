@@ -118,6 +118,25 @@ export class Cases implements OnInit, AfterViewInit {
     this.router.navigate(['/cases/new']);
   }
 
+  exporting = false;
+
+  exportToExcel() {
+    this.exporting = true;
+    this.caseService.exportToExcel().subscribe({
+      next: (blob) => {
+        this.exporting = false;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const today = new Date().toISOString().substring(0, 10).replace(/-/g, '');
+        a.href = url;
+        a.download = `casos_${today}.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => { this.exporting = false; }
+    });
+  }
+
   announceSortChange(sortState: Sort) {
     if (sortState.direction) {
       this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);

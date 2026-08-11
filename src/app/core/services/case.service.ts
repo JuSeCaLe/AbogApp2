@@ -49,6 +49,12 @@ export class CaseService {
     }).pipe(map(c => this.enrich([c])[0]));
   }
 
+  // Exporta a Excel los casos visibles para el usuario actual (el backend
+  // aplica el mismo filtro por rol-demandante que usa el listado).
+  exportToExcel(): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/export`, { responseType: 'blob' });
+  }
+
   // ===============================
   // ALERT LOGIC (computed on frontend)
   // ===============================

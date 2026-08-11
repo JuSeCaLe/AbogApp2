@@ -6,8 +6,29 @@
         {{ defendantText }}
       </h2>
 
-      <p style="margin:6px 0 0 0;">
-        <strong>{{ c.process.processType }}</strong> · Radicado {{ c.process.radicado }}
+      <p style="margin:6px 0 0 0; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <strong>{{ c.process.processType }}</strong>
+        <span>·</span>
+
+        <ng-container *ngIf="!editingRadicado">
+          <span>Radicado {{ c.process.radicado || 'sin asignar' }}</span>
+          <button mat-icon-button matTooltip="Editar radicado" (click)="startEditRadicado()">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="editingRadicado">
+          <mat-form-field appearance="outline" style="width:220px;" subscriptSizing="dynamic">
+            <mat-label>Radicado</mat-label>
+            <input matInput [(ngModel)]="radicadoDraft" [disabled]="savingRadicado">
+          </mat-form-field>
+          <button mat-icon-button color="primary" matTooltip="Guardar" [disabled]="savingRadicado" (click)="saveRadicado()">
+            <mat-icon>check</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Cancelar" [disabled]="savingRadicado" (click)="cancelEditRadicado()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </ng-container>
       </p>
 
       <p style="margin:8px 0 0 0;">
