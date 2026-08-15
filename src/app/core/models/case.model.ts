@@ -60,6 +60,8 @@ export interface Case {
   createdAt?: string;
   demandanteRoleId: string;
   demandanteRoleName?: string;
+  driveFolderId?: string;
+  driveFolderUrl?: string;
   process: ProcessInfo;
   partiesInfo: PartyInfo[];
   financialInfo?: FinancialInfo;
@@ -83,4 +85,13 @@ export interface CaseProceduralNote {
   id: number;
   createdAt: string;
   text: string;
+}
+
+export interface DriveFile {
+  id: string;
+  name: string;
+  mimeType?: string;
+  webViewLink?: string;
+  createdAt?: string;
+  size?: number;
 }

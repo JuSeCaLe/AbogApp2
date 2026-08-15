@@ -103,6 +103,70 @@
       </div>
     </mat-tab>
 
+    <mat-tab label="Documentos">
+      <div style="padding:16px 0;">
+
+        <div *ngIf="driveError" class="mat-error" style="margin-bottom:12px;">
+          {{ driveError }}
+        </div>
+
+        <!-- Sin carpeta creada todavía -->
+        <div *ngIf="!c.driveFolderId" style="display:flex; align-items:center; gap:12px;">
+          <button mat-raised-button color="primary" [disabled]="creatingDriveFolder" (click)="createDriveFolder()">
+            <mat-icon>create_new_folder</mat-icon>
+            {{ creatingDriveFolder ? 'Creando carpeta…' : 'Crear carpeta en Drive' }}
+          </button>
+          <span style="color:#6B7280; font-size:0.9rem;">
+            Se crea automáticamente al subir el primer documento si no lo haces antes.
+          </span>
+        </div>
+
+        <!-- Carpeta creada: subir y listar -->
+        <div *ngIf="c.driveFolderId">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+            <a [href]="c.driveFolderUrl" target="_blank" rel="noopener" mat-stroked-button>
+              <mat-icon>folder_open</mat-icon>
+              Abrir carpeta en Drive
+            </a>
+
+            <button mat-raised-button color="primary" [disabled]="uploadingDriveFile" (click)="fileInput.click()">
+              <mat-icon>upload_file</mat-icon>
+              {{ uploadingDriveFile ? 'Subiendo…' : 'Subir documento' }}
+            </button>
+            <input #fileInput type="file" hidden (change)="onFileSelected($event)">
+          </div>
+
+          <div class="table-scroll-wrapper">
+            <table mat-table [dataSource]="driveFiles" class="mat-elevation-z1" style="width:100%;">
+
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Nombre</th>
+                <td mat-cell *matCellDef="let f">
+                  <a [href]="f.webViewLink" target="_blank" rel="noopener">{{ f.name }}</a>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="createdAt">
+                <th mat-header-cell *matHeaderCellDef>Subido</th>
+                <td mat-cell *matCellDef="let f">{{ f.createdAt ? (f.createdAt | date:'yyyy-MM-dd HH:mm') : '-' }}</td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['name', 'createdAt']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['name', 'createdAt'];"></tr>
+            </table>
+
+            <p *ngIf="!loadingDriveFiles && driveFiles.length === 0" style="color:#6B7280; padding:12px 0;">
+              Aún no hay documentos en la carpeta de este caso.
+            </p>
+            <p *ngIf="loadingDriveFiles" style="color:#6B7280; padding:12px 0;">
+              Cargando documentos…
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </mat-tab>
+
   </mat-tab-group>
 
 </ng-container>

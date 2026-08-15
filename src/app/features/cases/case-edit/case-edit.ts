@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CaseService } from '../../../core/services/case.service';
-import { Case, CaseProcessStage, CaseProceduralNote } from '../../../core/models/case.model';
+import { Case, CaseProcessStage, CaseProceduralNote, DriveFile } from '../../../core/models/case.model';
 import { ProcessStageDialog } from './process-stage-dialog/process-stage-dialog';
 import { ProceduralNoteDialog } from './procedural-note-dialog/procedural-note-dialog';
 import { MatDialog } from '@angular/material/dialog';
@@ -23,6 +23,12 @@ export class CaseEdit implements OnInit {
   displayedStageColumns = ['createdAt', 'stageName', 'subStageName', 'observation'];
   displayedNoteColumns = ['createdAt', 'text'];
 
+  driveFiles: DriveFile[] = [];
+  loadingDriveFiles = false;
+  creatingDriveFolder = false;
+  uploadingDriveFile = false;
+  driveError = '';
+
   constructor(
     private route: ActivatedRoute,
     private caseService: CaseService,
@@ -39,7 +45,67 @@ export class CaseEdit implements OnInit {
     this.caseService.getCaseById(this.caseId).subscribe(c => {
       this.caseData = c;
       this.cdr.detectChanges();
+
+      if (c?.driveFolderId) this.loadDriveFiles();
     });
+  }
+
+  loadDriveFiles(): void {
+    this.loadingDriveFiles = true;
+    this.driveError = '';
+    this.caseService.getDriveFiles(this.caseId).subscribe({
+      next: (files) => {
+        this.driveFiles = files;
+        this.loadingDriveFiles = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.loadingDriveFiles = false;
+        this.driveError = this.extractDriveError(err);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  createDriveFolder(): void {
+    this.creatingDriveFolder = true;
+    this.driveError = '';
+    this.caseService.createDriveFolder(this.caseId).subscribe({
+      next: () => {
+        this.creatingDriveFolder = false;
+        this.loadCase();
+      },
+      error: (err) => {
+        this.creatingDriveFolder = false;
+        this.driveError = this.extractDriveError(err);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+
+    this.uploadingDriveFile = true;
+    this.driveError = '';
+    this.caseService.uploadDriveFile(this.caseId, file).subscribe({
+      next: () => {
+        this.uploadingDriveFile = false;
+        this.loadCase();
+      },
+      error: (err) => {
+        this.uploadingDriveFile = false;
+        this.driveError = this.extractDriveError(err);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private extractDriveError(err: any): string {
+    return err?.error?.detail || err?.error?.message || 'No se pudo completar la operación con Google Drive.';
   }
 
   startEditRadicado(): void {

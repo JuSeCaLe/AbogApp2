@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Case, CaseProcessStage, CaseProceduralNote } from '../models/case.model';
+import { Case, CaseProcessStage, CaseProceduralNote, DriveFile } from '../models/case.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -53,6 +53,24 @@ export class CaseService {
   // aplica el mismo filtro por rol-demandante que usa el listado).
   exportToExcel(): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/export`, { responseType: 'blob' });
+  }
+
+  // ===============================
+  // DOCUMENTOS (Google Drive)
+  // ===============================
+
+  createDriveFolder(caseId: number): Observable<{ id: string; url: string }> {
+    return this.http.post<{ id: string; url: string }>(`${this.baseUrl}/${caseId}/drive-folder`, {});
+  }
+
+  getDriveFiles(caseId: number): Observable<DriveFile[]> {
+    return this.http.get<DriveFile[]>(`${this.baseUrl}/${caseId}/drive-files`);
+  }
+
+  uploadDriveFile(caseId: number, file: File): Observable<DriveFile> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<DriveFile>(`${this.baseUrl}/${caseId}/drive-files`, formData);
   }
 
   // ===============================
