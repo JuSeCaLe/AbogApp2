@@ -1,0 +1,46 @@
+<h2 style="margin:0 0 12px 0;">Google Drive del despacho</h2>
+
+<p style="color:#6B7280; max-width:640px;">
+  Esta es la única cuenta de Google que va a alojar los documentos de <strong>todos los casos</strong>,
+  sin importar qué usuario de la App los suba. No es necesario que cada abogado conecte su propia cuenta.
+</p>
+
+<div *ngIf="banner" class="banner" [class.banner-success]="banner.type === 'success'" [class.banner-error]="banner.type === 'error'">
+  {{ banner.text }}
+</div>
+
+<mat-card style="max-width:520px; margin-top:16px;">
+  <mat-card-content>
+
+    <div *ngIf="loading">Cargando estado…</div>
+
+    <ng-container *ngIf="!loading && status">
+
+      <div *ngIf="status.connected" style="display:flex; align-items:center; gap:12px;">
+        <mat-icon style="color:#1f8646;">check_circle</mat-icon>
+        <div>
+          <div><strong>Conectada:</strong> {{ status.email }}</div>
+          <div style="color:#6B7280; font-size:0.85rem;">Desde {{ status.connectedAt | date:'yyyy-MM-dd HH:mm' }}</div>
+        </div>
+      </div>
+
+      <div *ngIf="!status.connected" style="display:flex; align-items:center; gap:12px;">
+        <mat-icon style="color:#e3640f;">error_outline</mat-icon>
+        <span>No hay ninguna cuenta conectada. No se pueden subir ni ver documentos hasta conectar una.</span>
+      </div>
+
+      <div style="margin-top:16px; display:flex; gap:10px;">
+        <button mat-raised-button color="primary" [disabled]="connecting" (click)="connect()">
+          <mat-icon>link</mat-icon>
+          {{ connecting ? 'Redirigiendo…' : (status.connected ? 'Reconectar / cambiar cuenta' : 'Conectar cuenta de Google') }}
+        </button>
+
+        <button mat-stroked-button *ngIf="status.connected" [disabled]="disconnecting" (click)="disconnect()">
+          {{ disconnecting ? 'Desconectando…' : 'Desconectar' }}
+        </button>
+      </div>
+
+    </ng-container>
+
+  </mat-card-content>
+</mat-card>
