@@ -6,6 +6,7 @@
     "start": "ng serve -c development",
     "build": "ng build -c production",
     "buld:dev": "ng build -c development",
+    "build:local": "ng build -c local",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:Aboga2": "node dist/Aboga2/server/server.mjs"
