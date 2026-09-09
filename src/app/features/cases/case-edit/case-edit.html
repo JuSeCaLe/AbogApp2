@@ -1,5 +1,10 @@
 <ng-container *ngIf="caseData as c">
 
+  <button mat-button type="button" (click)="volver()" style="margin-bottom:8px;">
+    <mat-icon>arrow_back</mat-icon>
+    Volver
+  </button>
+
   <mat-card>
     <mat-card-content>
       <h2 style="margin:0;">
@@ -34,6 +39,24 @@
       <p style="margin:8px 0 0 0;">
         Juzgado asignado: <strong>{{ c.process.court }}</strong>
       </p>
+
+      <div style="margin-top:16px; padding-top:16px; border-top:1px solid #e0e0e0; display:flex; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+        <mat-form-field appearance="outline" style="width:280px;" subscriptSizing="dynamic">
+          <mat-label>Memorial</mat-label>
+          <mat-select [(ngModel)]="selectedMemorialTemplateId">
+            <mat-option *ngFor="let t of memorialTemplates" [value]="t.id">{{ t.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="button" [disabled]="!canGenerateMemorial" (click)="generateMemorial()">
+          <mat-icon>description</mat-icon>
+          {{ generatingMemorial ? 'Generando…' : 'Generar memorial' }}
+        </button>
+      </div>
+
+      <div *ngIf="memorialError" class="mat-error" style="margin-top:8px;">
+        {{ memorialError }}
+      </div>
     </mat-card-content>
   </mat-card>
 

@@ -1,7 +1,10 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
 import { CaseService } from '../../../core/services/case.service';
+import { MemorialService } from '../../../core/services/memorial.service';
 import { Case, CaseProcessStage, CaseProceduralNote, DriveFile } from '../../../core/models/case.model';
+import { MemorialTemplate } from '../../../core/models/memorial.model';
 import { ProcessStageDialog } from './process-stage-dialog/process-stage-dialog';
 import { ProceduralNoteDialog } from './procedural-note-dialog/procedural-note-dialog';
 import { MatDialog } from '@angular/material/dialog';
@@ -29,15 +32,23 @@ export class CaseEdit implements OnInit {
   uploadingDriveFile = false;
   driveError = '';
 
+  memorialTemplates: MemorialTemplate[] = [];
+  selectedMemorialTemplateId: number | null = null;
+  generatingMemorial = false;
+  memorialError = '';
+
   constructor(
     private route: ActivatedRoute,
     private caseService: CaseService,
+    private memorialService: MemorialService,
     private dialog: MatDialog,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private location: Location
   ) { }
 
   ngOnInit(): void {
     this.caseId = Number(this.route.snapshot.paramMap.get('id'));
+    this.memorialService.getTemplates().subscribe(t => this.memorialTemplates = t);
     this.loadCase();
   }
 
@@ -106,6 +117,38 @@ export class CaseEdit implements OnInit {
 
   private extractDriveError(err: any): string {
     return err?.error?.detail || err?.error?.message || 'No se pudo completar la operación con Google Drive.';
+  }
+
+  volver(): void {
+    this.location.back();
+  }
+
+  get canGenerateMemorial(): boolean {
+    return !!this.selectedMemorialTemplateId && !this.generatingMemorial;
+  }
+
+  generateMemorial(): void {
+    if (!this.canGenerateMemorial || !this.selectedMemorialTemplateId) return;
+
+    this.generatingMemorial = true;
+    this.memorialError = '';
+
+    this.memorialService.generate(this.selectedMemorialTemplateId, [this.caseId]).subscribe({
+      next: (response) => {
+        this.generatingMemorial = false;
+        const fileName = MemorialService.extractFileName(response, 'memorial.docx');
+        const url = window.URL.createObjectURL(response.body!);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        this.generatingMemorial = false;
+        this.memorialError = err?.error?.message || 'No se pudo generar el memorial.';
+      }
+    });
   }
 
   startEditRadicado(): void {

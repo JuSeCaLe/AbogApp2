@@ -15,6 +15,13 @@
     <span>Casos</span>
   </a>
 
+  <a mat-list-item
+     routerLink="/memorials"
+     routerLinkActive="nav-active">
+    <mat-icon>description</mat-icon>
+    <span>Memoriales</span>
+  </a>
+
   <ng-container *ngIf="auth.hasRole('r-admin')">
 
     <mat-expansion-panel>

@@ -1,0 +1,41 @@
+.filters {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.template-select {
+  min-width: 280px;
+}
+
+.selection-count {
+  color: #6B7280;
+  font-size: 0.9rem;
+}
+
+.error-banner {
+  margin-bottom: 12px;
+}
+
+.row-clickable {
+  cursor: pointer;
+}
+
+.empty-hint {
+  color: #6B7280;
+  padding: 16px 0;
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}

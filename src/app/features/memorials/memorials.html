@@ -1,0 +1,87 @@
+<h1>Generar Memoriales</h1>
+
+<div class="filters">
+  <mat-form-field>
+    <mat-label>Radicado</mat-label>
+    <input matInput [(ngModel)]="filterRadicado" (keyup)="applyFilter()">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="template-select">
+    <mat-label>Memorial</mat-label>
+    <mat-select [(ngModel)]="selectedTemplateId">
+      <mat-option *ngFor="let t of templates" [value]="t.id">{{ t.name }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <span class="spacer"></span>
+
+  <span class="selection-count" *ngIf="selection.selected.length > 0">
+    {{ selection.selected.length }} caso(s) seleccionado(s)
+  </span>
+</div>
+
+<div *ngIf="error" class="mat-error error-banner">{{ error }}</div>
+
+<div class="table-scroll-wrapper">
+  <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8" style="width:100%;">
+
+    <ng-container matColumnDef="select">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-checkbox
+          [checked]="isAllSelected()"
+          [indeterminate]="selection.selected.length > 0 && !isAllSelected()"
+          (change)="toggleAll()">
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let c">
+        <mat-checkbox
+          (click)="$event.stopPropagation()"
+          (change)="selection.toggle(c)"
+          [checked]="selection.isSelected(c)">
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="defendantName">
+      <th mat-header-cell *matHeaderCellDef>Demandado</th>
+      <td mat-cell *matCellDef="let c">{{ getDefendantName(c) }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="radicado">
+      <th mat-header-cell *matHeaderCellDef>Radicado</th>
+      <td mat-cell *matCellDef="let c">{{ c.process.radicado || '-' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="processType">
+      <th mat-header-cell *matHeaderCellDef>Tipo de proceso</th>
+      <td mat-cell *matCellDef="let c">{{ c.process.processType }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="alert">
+      <th mat-header-cell *matHeaderCellDef>Estado</th>
+      <td mat-cell *matCellDef="let c">
+        <span class="badge"
+          [class.badge-red]="c.alertColor === 'red'"
+          [class.badge-orange]="c.alertColor === 'orange'"
+          [class.badge-green]="c.alertColor === 'green'">
+          {{ getAlertLabel(c) }}
+        </span>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selection.toggle(row)" class="row-clickable"></tr>
+  </table>
+
+  <p *ngIf="!loading && dataSource.data.length === 0" class="empty-hint">No hay casos registrados.</p>
+</div>
+
+<mat-paginator [pageSize]="10" [pageSizeOptions]="[10,25,50]" showFirstLastButtons></mat-paginator>
+
+<div class="actions">
+  <button mat-button type="button" (click)="volver()">Volver</button>
+  <button mat-raised-button color="primary" type="button" [disabled]="!canGenerate" (click)="generate()">
+    <mat-icon>description</mat-icon>
+    {{ generating ? 'Generando…' : 'Generar' }}
+  </button>
+</div>

@@ -24,6 +24,11 @@ const routes: Routes = [
           .then(m => m.CasesModule)
       },
       {
+        path: 'memorials',
+        loadChildren: () => import('./features/memorials/memorials.module')
+          .then(m => m.MemorialsModule)
+      },
+      {
         path: 'security',
         canMatch: [roleGuard],
         data: { roles: ['r-admin'] },
