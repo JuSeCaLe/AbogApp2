@@ -2,6 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { CatalogService, CatalogProcessType, CatalogStage, CatalogSubStage } from '../../../../core/services/catalog.service';
+import { CaseProcessStage } from '../../../../core/models/case.model';
 
 @Component({
   selector: 'app-process-stage-dialog',
@@ -16,17 +17,22 @@ export class ProcessStageDialog implements OnInit {
   filteredStages: CatalogStage[] = [];
   filteredSubStages: CatalogSubStage[] = [];
 
+  get isEditing(): boolean {
+    return !!this.data?.stage;
+  }
+
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<ProcessStageDialog>,
     private catalogService: CatalogService,
-    @Inject(MAT_DIALOG_DATA) public data: { processType: string }
+    @Inject(MAT_DIALOG_DATA) public data: { processType: string; stage?: CaseProcessStage }
   ) {
+    const stage = data?.stage;
     this.form = this.fb.group({
-      stageDate: [new Date(), Validators.required],
+      stageDate: [stage ? new Date(stage.createdAt) : new Date(), Validators.required],
       stageId: [null, Validators.required],
       subStageId: [null],
-      observation: ['']
+      observation: [stage?.observation ?? '']
     });
   }
 
@@ -36,6 +42,19 @@ export class ProcessStageDialog implements OnInit {
       const catalogName = this.mapToCatalogName(this.data?.processType ?? '');
       const pt = catalog.find(p => p.name === catalogName);
       this.filteredStages = pt?.stages ?? [];
+
+      // En modo edición, preselecciona la etapa/subetapa que ya tenía el
+      // registro buscándolas por nombre (el modelo solo guarda el texto,
+      // no los ids del catálogo).
+      const stage = this.data?.stage;
+      if (stage) {
+        const matchedStage = this.filteredStages.find(s => this.sameName(s.name, stage.stageName));
+        if (matchedStage) {
+          this.filteredSubStages = matchedStage.subStages;
+          const matchedSub = matchedStage.subStages.find(ss => this.sameName(ss.name, stage.subStageName));
+          this.form.patchValue({ stageId: matchedStage.id, subStageId: matchedSub?.id ?? null }, { emitEvent: false });
+        }
+      }
     });
 
     this.form.get('stageId')!.valueChanges.subscribe((stageId: number) => {
@@ -43,6 +62,10 @@ export class ProcessStageDialog implements OnInit {
       this.filteredSubStages = stage?.subStages ?? [];
       this.form.get('subStageId')!.setValue(null, { emitEvent: false });
     });
+  }
+
+  private sameName(a: string, b: string): boolean {
+    return (a ?? '').trim().toUpperCase() === (b ?? '').trim().toUpperCase();
   }
 
   private mapToCatalogName(processType: string): string {

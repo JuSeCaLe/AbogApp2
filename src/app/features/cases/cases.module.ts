@@ -6,6 +6,7 @@ import { Cases } from './cases';
 import { CaseCreate } from './case-create/case-create';
 import { CaseEdit } from './case-edit/case-edit';
 import { MaterialModule } from '../../shared/material.module';
+import { SharedModule } from '../../shared/shared.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProcessStageDialog } from './case-edit/process-stage-dialog/process-stage-dialog';
 import { ProceduralNoteDialog } from './case-edit/procedural-note-dialog/procedural-note-dialog';
@@ -23,6 +24,7 @@ import { ProceduralNoteDialog } from './case-edit/procedural-note-dialog/procedu
     CommonModule,
     CasesRoutingModule,
     MaterialModule,
+    SharedModule,
     ReactiveFormsModule,
     FormsModule
   ]

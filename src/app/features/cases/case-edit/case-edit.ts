@@ -7,6 +7,7 @@ import { Case, CaseProcessStage, CaseProceduralNote, DriveFile } from '../../../
 import { MemorialTemplate } from '../../../core/models/memorial.model';
 import { ProcessStageDialog } from './process-stage-dialog/process-stage-dialog';
 import { ProceduralNoteDialog } from './procedural-note-dialog/procedural-note-dialog';
+import { ConfirmDialog } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { MatDialog } from '@angular/material/dialog';
 
 @Component({
@@ -23,7 +24,7 @@ export class CaseEdit implements OnInit {
   radicadoDraft = '';
   savingRadicado = false;
 
-  displayedStageColumns = ['createdAt', 'stageName', 'subStageName', 'observation'];
+  displayedStageColumns = ['createdAt', 'stageName', 'subStageName', 'observation', 'actions'];
   displayedNoteColumns = ['createdAt', 'text'];
 
   driveFiles: DriveFile[] = [];
@@ -196,6 +197,46 @@ export class CaseEdit implements OnInit {
       };
 
       this.caseService.addProcessStage(this.caseId, stage)
+        .subscribe(() => this.loadCase());
+    });
+  }
+
+  editStage(row: CaseProcessStage): void {
+    const ref = this.dialog.open(ProcessStageDialog, {
+      data: { processType: this.caseData?.process?.processType ?? '', stage: row }
+    });
+
+    ref.afterClosed().subscribe(result => {
+      if (!result) return;
+
+      const stage: CaseProcessStage = {
+        id: row.id,
+        createdAt: result.stageDate,
+        stageName: result.stageName,
+        subStageName: result.subStageName ?? '',
+        observation: result.observation
+      };
+
+      this.caseService.updateProcessStage(this.caseId, stage)
+        .subscribe(() => this.loadCase());
+    });
+  }
+
+  deleteStage(row: CaseProcessStage): void {
+    const ref = this.dialog.open(ConfirmDialog, {
+      width: '420px',
+      panelClass: 'confirm-dialog-panel',
+      data: {
+        title: 'Eliminar etapa',
+        message: `¿Seguro que deseas eliminar la etapa "${row.stageName}${row.subStageName ? ' / ' + row.subStageName : ''}" del ${row.createdAt}?\nEsta acción NO se puede deshacer.`,
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar'
+      }
+    });
+
+    ref.afterClosed().subscribe((ok: boolean) => {
+      if (!ok) return;
+      this.caseService.deleteProcessStage(this.caseId, row.id)
         .subscribe(() => this.loadCase());
     });
   }

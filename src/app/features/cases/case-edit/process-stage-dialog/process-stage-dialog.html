@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Nueva etapa del proceso</h2>
+<h2 mat-dialog-title>{{ isEditing ? 'Editar etapa del proceso' : 'Nueva etapa del proceso' }}</h2>
 
 <mat-dialog-content [formGroup]="form" style="display:grid; gap:16px; min-width:clamp(300px, 50vw, 460px); padding-top:8px;">
 

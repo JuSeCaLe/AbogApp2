@@ -43,6 +43,20 @@ export class CaseService {
     }).pipe(map(c => this.enrich([c])[0]));
   }
 
+  updateProcessStage(caseId: number, stage: CaseProcessStage): Observable<Case | undefined> {
+    return this.http.put<Case>(`${this.baseUrl}/${caseId}/stages/${stage.id}`, {
+      stageDate: stage.createdAt,
+      stageName: stage.stageName,
+      subStageName: stage.subStageName,
+      observation: stage.observation
+    }).pipe(map(c => this.enrich([c])[0]));
+  }
+
+  deleteProcessStage(caseId: number, stageId: number): Observable<Case | undefined> {
+    return this.http.delete<Case>(`${this.baseUrl}/${caseId}/stages/${stageId}`)
+      .pipe(map(c => this.enrich([c])[0]));
+  }
+
   addProceduralNote(caseId: number, note: CaseProceduralNote): Observable<Case | undefined> {
     return this.http.post<Case>(`${this.baseUrl}/${caseId}/notes`, {
       text: note.text
