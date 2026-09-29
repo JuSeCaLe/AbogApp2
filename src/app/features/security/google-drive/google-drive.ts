@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GoogleDriveAdminService, GoogleDriveStatus } from '../../../core/services/google-drive-admin.service';
 
@@ -25,7 +25,8 @@ export class GoogleDrive implements OnInit {
   constructor(
     private driveService: GoogleDriveAdminService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -50,8 +51,8 @@ export class GoogleDrive implements OnInit {
   load(): void {
     this.loading = true;
     this.driveService.getStatus().subscribe({
-      next: (s) => { this.status = s; this.loading = false; },
-      error: () => { this.loading = false; }
+      next: (s) => { this.status = s; this.loading = false; this.cdr.detectChanges(); },
+      error: () => { this.loading = false; this.cdr.detectChanges(); }
     });
   }
 
@@ -59,7 +60,7 @@ export class GoogleDrive implements OnInit {
     this.connecting = true;
     this.driveService.start().subscribe({
       next: (r) => { window.location.href = r.url; },
-      error: () => { this.connecting = false; }
+      error: () => { this.connecting = false; this.cdr.detectChanges(); }
     });
   }
 
@@ -69,7 +70,7 @@ export class GoogleDrive implements OnInit {
     this.disconnecting = true;
     this.driveService.disconnect().subscribe({
       next: () => { this.disconnecting = false; this.load(); },
-      error: () => { this.disconnecting = false; }
+      error: () => { this.disconnecting = false; this.cdr.detectChanges(); }
     });
   }
 }

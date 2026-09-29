@@ -1,0 +1,7 @@
+.case-flags {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 14px;
+}

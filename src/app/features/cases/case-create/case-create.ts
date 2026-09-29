@@ -86,6 +86,9 @@ export class CaseCreate implements OnInit {
     const id = this.route.snapshot.params['id'];
     if (id) {
       this.editingId = +id;
+      // No modificable después de creado: se deshabilita el control en vez
+      // de solo ocultarlo, para que quede claro por qué no se puede tocar.
+      this.caseForm.get('folderNumber')?.disable();
       this.caseService.getCaseById(this.editingId).subscribe(c => {
         if (c) this.loadCase(c);
       });
@@ -120,6 +123,10 @@ export class CaseCreate implements OnInit {
 
   buildForm() {
     this.caseForm = this.fb.group({
+      // Solo se puede fijar al crear el caso; una vez creado queda de solo
+      // lectura (ver ngOnInit, deshabilita el control en modo edición).
+      folderNumber: [''],
+
       process: this.fb.group({
         // No es obligatorio al crear: muchos casos aún no tienen número de
         // radicado asignado por el juzgado. Se completa luego en edición.
@@ -211,6 +218,8 @@ export class CaseCreate implements OnInit {
 
   // ---------- Load ----------
   loadCase(c: Case) {
+    this.caseForm.get('folderNumber')?.setValue(c.folderNumber ?? '');
+
     // process (incluye filedAt/observations si existen; no rompe si no)
     this.caseForm.get('process')?.patchValue(c.process as any);
 
@@ -315,6 +324,7 @@ export class CaseCreate implements OnInit {
     const caseToSave: Case = {
       id: this.editingId || 0,
       demandanteRoleId: v.partiesInfo.demandanteRoleId,
+      folderNumber: String(v.folderNumber || '').trim() || undefined,
 
       // process incluye filedAt/observations sin romper el resto
       process: {

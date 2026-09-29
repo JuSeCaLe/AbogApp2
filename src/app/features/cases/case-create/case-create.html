@@ -4,6 +4,17 @@
 
 <form [formGroup]="caseForm" style="display:grid; gap:14px; max-width:1100px;">
 
+  <!-- CARPETA -->
+  <mat-card>
+    <mat-card-content style="padding-top:12px;">
+      <mat-form-field appearance="outline" style="width:220px;">
+        <mat-label>Número de carpeta</mat-label>
+        <input matInput formControlName="folderNumber">
+        <mat-hint *ngIf="editingId">No se puede modificar después de creado el caso</mat-hint>
+      </mat-form-field>
+    </mat-card-content>
+  </mat-card>
+
   <!-- PROCESO -->
   <mat-card formGroupName="process">
     <mat-card-title style="padding:16px 16px 0 16px;">Información del proceso</mat-card-title>

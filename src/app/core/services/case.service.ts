@@ -27,7 +27,11 @@ export class CaseService {
   }
 
   createCase(c: Case): Observable<Case> {
-    return this.http.post<Case>(this.baseUrl, this.toRequest(c)).pipe(map(created => this.enrich([created])[0]));
+    // folderNumber solo se manda al crear: el backend no lo acepta en el
+    // update (UpdateCaseRequest no tiene esa propiedad), así queda protegido
+    // contra cambios accidentales una vez creado el caso.
+    const body = { ...this.toRequest(c), folderNumber: c.folderNumber ?? null };
+    return this.http.post<Case>(this.baseUrl, body).pipe(map(created => this.enrich([created])[0]));
   }
 
   updateCase(c: Case): Observable<Case> {
@@ -81,10 +85,17 @@ export class CaseService {
     return this.http.get<DriveFile[]>(`${this.baseUrl}/${caseId}/drive-files`);
   }
 
-  uploadDriveFile(caseId: number, file: File): Observable<DriveFile> {
+  uploadDriveFile(caseId: number, file: File, documentType: string): Observable<DriveFile> {
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('documentType', documentType);
     return this.http.post<DriveFile>(`${this.baseUrl}/${caseId}/drive-files`, formData);
+  }
+
+  // Solo un admin puede llamar esto con éxito (el backend lo exige); a los
+  // demás usuarios ni siquiera se les muestra el botón (ver case-edit.html).
+  deleteDriveFile(caseId: number, fileId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${caseId}/drive-files/${fileId}`);
   }
 
   // ===============================

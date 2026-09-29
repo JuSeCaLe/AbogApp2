@@ -15,6 +15,8 @@ export interface FinancialInfo {
   capital?: number;
   obligations?: string;
   fngFag?: boolean;
+  paymentAgreement?: boolean;
+  portfolioSale?: boolean;
 }
 
 export interface MeasuresInfo {
@@ -60,6 +62,10 @@ export interface Case {
   createdAt?: string;
   demandanteRoleId: string;
   demandanteRoleName?: string;
+  // Número de carpeta física del despacho. Solo se fija al crear el caso;
+  // no viaja en las peticiones de actualización, así que no se puede
+  // modificar después (ver CaseService.toRequest / UpdateCaseRequest).
+  folderNumber?: string;
   driveFolderId?: string;
   driveFolderUrl?: string;
   process: ProcessInfo;
@@ -94,4 +100,5 @@ export interface DriveFile {
   webViewLink?: string;
   createdAt?: string;
   size?: number;
+  documentType?: string;
 }

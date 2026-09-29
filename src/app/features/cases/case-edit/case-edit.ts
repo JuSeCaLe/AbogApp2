@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { CaseService } from '../../../core/services/case.service';
 import { MemorialService } from '../../../core/services/memorial.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Case, CaseProcessStage, CaseProceduralNote, DriveFile } from '../../../core/models/case.model';
 import { MemorialTemplate } from '../../../core/models/memorial.model';
 import { ProcessStageDialog } from './process-stage-dialog/process-stage-dialog';
@@ -24,6 +25,8 @@ export class CaseEdit implements OnInit {
   radicadoDraft = '';
   savingRadicado = false;
 
+  savingFlag = false;
+
   displayedStageColumns = ['createdAt', 'stageName', 'subStageName', 'observation', 'actions'];
   displayedNoteColumns = ['createdAt', 'text'];
 
@@ -31,7 +34,20 @@ export class CaseEdit implements OnInit {
   loadingDriveFiles = false;
   creatingDriveFolder = false;
   uploadingDriveFile = false;
+  deletingDriveFileId: string | null = null;
   driveError = '';
+
+  documentTypes = ['Auto', 'Providencia', 'Memoriales u otros'];
+  selectedDocumentType: string | null = null;
+
+  get driveFileColumns(): string[] {
+    const base = ['name', 'documentType', 'createdAt'];
+    return this.isAdmin ? [...base, 'actions'] : base;
+  }
+
+  get isAdmin(): boolean {
+    return this.auth.hasRole('r-admin');
+  }
 
   memorialTemplates: MemorialTemplate[] = [];
   selectedMemorialTemplateId: number | null = null;
@@ -42,6 +58,7 @@ export class CaseEdit implements OnInit {
     private route: ActivatedRoute,
     private caseService: CaseService,
     private memorialService: MemorialService,
+    private auth: AuthService,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef,
     private location: Location
@@ -99,13 +116,14 @@ export class CaseEdit implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     input.value = '';
-    if (!file) return;
+    if (!file || !this.selectedDocumentType) return;
 
     this.uploadingDriveFile = true;
     this.driveError = '';
-    this.caseService.uploadDriveFile(this.caseId, file).subscribe({
+    this.caseService.uploadDriveFile(this.caseId, file, this.selectedDocumentType).subscribe({
       next: () => {
         this.uploadingDriveFile = false;
+        this.selectedDocumentType = null;
         this.loadCase();
       },
       error: (err) => {
@@ -113,6 +131,40 @@ export class CaseEdit implements OnInit {
         this.driveError = this.extractDriveError(err);
         this.cdr.detectChanges();
       }
+    });
+  }
+
+  // Solo un admin ve el botón en la plantilla; el backend también lo exige
+  // por su cuenta, esto no es la única barrera.
+  deleteDriveFile(f: DriveFile): void {
+    const ref = this.dialog.open(ConfirmDialog, {
+      width: '420px',
+      panelClass: 'confirm-dialog-panel',
+      data: {
+        title: 'Eliminar documento',
+        message: `¿Seguro que deseas eliminar "${f.name}"? Se manda a la papelera de Drive.`,
+        confirmText: 'Eliminar',
+        cancelText: 'Cancelar'
+      }
+    });
+
+    ref.afterClosed().subscribe((ok: boolean) => {
+      if (!ok) return;
+
+      this.deletingDriveFileId = f.id;
+      this.driveError = '';
+      this.caseService.deleteDriveFile(this.caseId, f.id).subscribe({
+        next: () => {
+          this.deletingDriveFileId = null;
+          this.driveFiles = this.driveFiles.filter(x => x.id !== f.id);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.deletingDriveFileId = null;
+          this.driveError = this.extractDriveError(err);
+          this.cdr.detectChanges();
+        }
+      });
     });
   }
 
@@ -177,6 +229,37 @@ export class CaseEdit implements OnInit {
         this.loadCase();
       },
       error: () => { this.savingRadicado = false; }
+    });
+  }
+
+  toggleFinancialFlag(key: 'paymentAgreement' | 'portfolioSale', value: boolean): void {
+    if (!this.caseData) return;
+
+    const previousFinancialInfo = this.caseData.financialInfo;
+    const updated: Case = {
+      ...this.caseData,
+      financialInfo: { ...(previousFinancialInfo ?? {}), [key]: value }
+    };
+
+    // Optimista: refleja el cambio de una vez en la vista (y en el propio
+    // toggle) sin esperar la respuesta del backend — si no, el control queda
+    // esperando el round-trip antes de poder volver a cambiarlo. Si la
+    // petición falla, se revierte.
+    this.caseData = updated;
+    this.savingFlag = true;
+    this.cdr.detectChanges();
+
+    this.caseService.updateCase(updated).subscribe({
+      next: (c) => {
+        this.savingFlag = false;
+        if (c) this.caseData = c;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.savingFlag = false;
+        this.caseData = { ...updated, financialInfo: previousFinancialInfo };
+        this.cdr.detectChanges();
+      }
     });
   }
 
