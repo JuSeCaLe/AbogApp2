@@ -1,0 +1,100 @@
+<button mat-button type="button" (click)="volver()" style="margin-bottom:8px;">
+  <mat-icon>arrow_back</mat-icon>
+  Volver
+</button>
+
+<h2 style="margin:0 0 4px 0;">Carga masiva de casos</h2>
+<p style="color:#6B7280; max-width:760px;">
+  Sube el Excel con los casos (y, opcionalmente, su historial de etapas). Primero se muestra una vista previa —
+  nada se guarda todavía — para que revises los errores antes de confirmar.
+</p>
+
+<mat-card style="max-width:900px; margin-top:12px;">
+  <mat-card-content style="display:flex; flex-direction:column; gap:16px;">
+
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <button mat-stroked-button type="button" [disabled]="downloadingTemplate" (click)="downloadTemplate()">
+        <mat-icon>download</mat-icon>
+        {{ downloadingTemplate ? 'Descargando…' : 'Descargar plantilla' }}
+      </button>
+
+      <button mat-stroked-button type="button" (click)="fileInput.click()">
+        <mat-icon>attach_file</mat-icon>
+        {{ file ? file.name : 'Elegir archivo .xlsx' }}
+      </button>
+      <input #fileInput type="file" hidden accept=".xlsx" (change)="onFileSelected($event)">
+
+      <button mat-raised-button color="primary" type="button" [disabled]="!file || uploading" (click)="preview()">
+        <mat-icon>visibility</mat-icon>
+        {{ uploading ? 'Procesando…' : 'Ver vista previa' }}
+      </button>
+    </div>
+
+    <div *ngIf="error" class="mat-error">{{ error }}</div>
+
+    <ng-container *ngIf="report as r">
+
+      <div [style.color]="r.committed ? '#1f8646' : '#374151'" style="font-weight:500;">
+        <span *ngIf="!r.committed">
+          Vista previa: {{ r.validCases }} de {{ r.totalCases }} casos listos para crear
+          <span *ngIf="r.invalidCases > 0">({{ r.invalidCases }} con errores, no se van a crear)</span>.
+        </span>
+        <span *ngIf="r.committed">
+          ✔ Se crearon {{ r.validCases }} casos correctamente
+          <span *ngIf="r.invalidCases > 0">({{ r.invalidCases }} quedaron fuera por errores)</span>.
+        </span>
+      </div>
+
+      <div class="table-scroll-wrapper">
+        <table mat-table [dataSource]="r.rows" class="mat-elevation-z1" style="width:100%;">
+
+          <ng-container matColumnDef="rowNumber">
+            <th mat-header-cell *matHeaderCellDef>Fila</th>
+            <td mat-cell *matCellDef="let row">{{ row.rowNumber }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="folderNumber">
+            <th mat-header-cell *matHeaderCellDef>N° Carpeta</th>
+            <td mat-cell *matCellDef="let row">{{ row.folderNumber || '-' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="demandado">
+            <th mat-header-cell *matHeaderCellDef>Demandado</th>
+            <td mat-cell *matCellDef="let row">{{ row.demandado || '-' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let row">
+              <span *ngIf="row.ok" style="color:#1f8646;">
+                <mat-icon style="vertical-align:middle; font-size:18px; height:18px; width:18px;">check_circle</mat-icon>
+                OK
+              </span>
+              <span *ngIf="!row.ok" style="color:#b00020;">
+                <mat-icon style="vertical-align:middle; font-size:18px; height:18px; width:18px;">error</mat-icon>
+                <span *ngFor="let msg of row.errors">{{ msg }}<br></span>
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="stagesCount">
+            <th mat-header-cell *matHeaderCellDef>Etapas</th>
+            <td mat-cell *matCellDef="let row">{{ row.stagesCount }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" [style.background]="row.ok ? '' : '#fff5f5'"></tr>
+        </table>
+      </div>
+
+      <div *ngIf="!r.committed" style="display:flex; justify-content:flex-end;">
+        <button mat-raised-button color="primary" type="button" [disabled]="!canConfirm" (click)="confirm()">
+          <mat-icon>cloud_upload</mat-icon>
+          {{ committing ? 'Creando casos…' : ('Confirmar carga (' + r.validCases + ')') }}
+        </button>
+      </div>
+
+    </ng-container>
+
+  </mat-card-content>
+</mat-card>

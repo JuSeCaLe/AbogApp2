@@ -21,6 +21,10 @@ export class Login {
   ) {}
 
   ngOnInit() {
+    if (this.route.snapshot.queryParamMap.get('sessionExpired')) {
+      this.error = 'Tu sesión expiró. Inicia sesión de nuevo.';
+    }
+
     if (this.auth.isAuthenticated()) {
       this.auth.loadMe().subscribe({ error: () => this.auth.logout() });
     }

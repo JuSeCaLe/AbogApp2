@@ -1,0 +1,43 @@
+<h2 mat-dialog-title>{{ isEditing ? 'Editar plantilla' : 'Nueva plantilla' }}</h2>
+
+<mat-dialog-content [formGroup]="form" style="display:grid; gap:16px; min-width:clamp(320px, 55vw, 520px); padding-top:8px;">
+
+  <mat-form-field appearance="outline">
+    <mat-label>Nombre</mat-label>
+    <input matInput formControlName="name">
+    <mat-error *ngIf="form.get('name')?.hasError('required')">El nombre es obligatorio</mat-error>
+  </mat-form-field>
+
+  <mat-slide-toggle color="primary" formControlName="active">
+    {{ form.get('active')?.value ? 'Activa' : 'Inactiva' }}
+  </mat-slide-toggle>
+
+  <div>
+    <button mat-stroked-button type="button" (click)="fileInput.click()">
+      <mat-icon>upload_file</mat-icon>
+      {{ isEditing ? 'Reemplazar archivo (opcional)' : 'Elegir archivo .docx' }}
+    </button>
+    <input #fileInput type="file" hidden accept=".docx" (change)="onFileSelected($event)">
+    <span *ngIf="file" style="margin-left:10px; color:#374151;">{{ file.name }}</span>
+    <div *ngIf="fileError" class="mat-error" style="margin-top:6px;">{{ fileError }}</div>
+  </div>
+
+  <div style="background:#f5f5f5; border-radius:8px; padding:12px 16px;">
+    <strong style="display:block; margin-bottom:6px;">Variables disponibles</strong>
+    <span style="color:#6B7280; font-size:0.85rem;">
+      Escribe el nombre entre corchetes en el .docx, ej. <code>[TipoProceso]</code>:
+    </span>
+    <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">
+      <span *ngFor="let v of variables" [matTooltip]="v.description"
+            style="background:#fff; border:1px solid #e0e0e0; border-radius:4px; padding:2px 8px; font-size:0.82rem; cursor:default;">
+        [{{ v.token }}]
+      </span>
+    </div>
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="save()">Guardar</button>
+</mat-dialog-actions>

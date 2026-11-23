@@ -6,6 +6,8 @@ import { ObligationTypeForm } from './obligation-types/obligation-types-form/obl
 import { ObligationTypeList } from './obligation-types/obligation-types-list/obligation-types-list';
 import { ProcessTypeList } from './process-types/process-types-list/process-types-list';
 import { ProcessTypeForm } from './process-types/process-types-form/process-types-form';
+import { MemorialTemplatesList } from './memorial-templates/memorial-templates-list/memorial-templates-list';
+import { CaseBulkImport } from './case-bulk-import/case-bulk-import';
 
 const routes: Routes = [
   { path: 'courts', component: CourtsList },
@@ -18,7 +20,10 @@ const routes: Routes = [
 
   { path: 'processType', component: ProcessTypeList },
   { path: 'processType/new', component: ProcessTypeForm },
-  { path: 'processType/:id', component: ProcessTypeForm }
+  { path: 'processType/:id', component: ProcessTypeForm },
+
+  { path: 'memorialTemplates', component: MemorialTemplatesList },
+  { path: 'caseBulkImport', component: CaseBulkImport }
 ];
 
 @NgModule({
